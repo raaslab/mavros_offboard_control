@@ -15,6 +15,7 @@ using namespace std;
 class UAVMotionPrimitive {  
 private:
 	ros::NodeHandle m_nh;
+	ros::NodeHandle m_priv_nh;
 
 	// Subscriber
 	ros::Subscriber m_state_sub;
@@ -27,6 +28,8 @@ private:
 
 	// ros::ServiceClient m_arming_client;
 	// ros::ServiceClient m_set_mode_client;
+
+	bool m_verbal_flag;
 
 	mavros_msgs::State m_current_state;
 	geometry_msgs::PoseStamped m_current_pose;

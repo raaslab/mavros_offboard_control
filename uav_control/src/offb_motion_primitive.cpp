@@ -7,8 +7,10 @@
 #include "uav_control/UAVMotionPrimitive.hpp"
 
 UAVMotionPrimitive::UAVMotionPrimitive() :
-m_motion_primitive_check(false), m_init_local_pose_check(true)
+m_verbal_flag(false), m_motion_primitive_check(false), m_init_local_pose_check(true), m_priv_nh("~")
 {
+    m_priv_nh.getParam("verbal_flag", m_verbal_flag);
+
     // Subscriber
     m_state_sub = m_nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, &UAVMotionPrimitive::state_cb, this);
@@ -150,16 +152,20 @@ void UAVMotionPrimitive::publish_motion_primitive() {
             abs(m_current_pose.pose.position.z - m_waypoint_pose.pose.position.z) < 0.5) {
             ROS_INFO("Now you can apply the next motion primitive.");
 
-            ROS_INFO("target_pos = (%.2f, %.2f, %.2f)", m_waypoint_pose.pose.position.x,
-                m_waypoint_pose.pose.position.y, m_waypoint_pose.pose.position.z);
+            if(m_verbal_flag) {
+                ROS_INFO("target_pos = (%.2f, %.2f, %.2f)", m_waypoint_pose.pose.position.x,
+                    m_waypoint_pose.pose.position.y, m_waypoint_pose.pose.position.z);
+            }
         }
     }
     else { // Motion primitive is not obtained yet.
         if (!m_init_local_pose_check) {
             m_local_pos_pub.publish(m_waypoint_pose);
 
-            ROS_INFO("target_pos = (%.2f, %.2f, %.2f)", m_waypoint_pose.pose.position.x,
-                m_waypoint_pose.pose.position.y, m_waypoint_pose.pose.position.z);
+            if(m_verbal_flag) {
+                ROS_INFO("target_pos = (%.2f, %.2f, %.2f)", m_waypoint_pose.pose.position.x,
+                    m_waypoint_pose.pose.position.y, m_waypoint_pose.pose.position.z);
+            }
         }
     }
 }
