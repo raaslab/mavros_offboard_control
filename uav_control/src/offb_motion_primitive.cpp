@@ -6,7 +6,9 @@
 
 #include "uav_control/UAVMotionPrimitive.hpp"
 
-UAVMotionPrimitive::UAVMotionPrimitive() {
+UAVMotionPrimitive::UAVMotionPrimitive() :
+m_motion_primitive_check(false), m_init_local_pose_check(true)
+{
     // Subscriber
     m_state_sub = m_nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, &UAVMotionPrimitive::state_cb, this);
@@ -25,9 +27,6 @@ UAVMotionPrimitive::UAVMotionPrimitive() {
     //         ("mavros/cmd/arming");
     // m_set_mode_client = m_nh.serviceClient<mavros_msgs::SetMode>
     //         ("mavros/set_mode");
-
-    m_motion_primitive_check = false;
-    m_init_local_pose_check = true;
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(20.0);
