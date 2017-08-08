@@ -4,31 +4,89 @@
  * stack and tested in Gazebo SITL
  */
 
-#include <ros/ros.h>
-#include <geometry_msgs/PoseStamped.h>
-// #include <mavros_msgs/CommandBool.h>
-// #include <mavros_msgs/SetMode.h>
-#include <mavros_msgs/State.h>
-#include <vector>
+#include "uav_control/UAVWaypointControl.hpp"
 
-int waypoint_count = 0;
-bool init_local_pose_check = true;
-std::vector<geometry_msgs::PoseStamped> waypoint_pose;
-geometry_msgs::PoseStamped current_pose;
-geometry_msgs::PoseStamped init_pose;
+UAVWaypointControl::UAVWaypointControl() :
+m_verbal_flag(false), m_init_local_pose_check(true), m_priv_nh("~")
+{
+    m_priv_nh.getParam("verbal_flag", m_verbal_flag);
 
-mavros_msgs::State current_state;
-void state_cb(const mavros_msgs::State::ConstPtr& msg){
-    current_state = *msg;
+    // Subscriber
+    m_state_sub = m_nh.subscribe<mavros_msgs::State>
+            ("mavros/state", 10, &UAVWaypointControl::state_cb, this);
+    m_local_pos_sub = m_nh.subscribe<geometry_msgs::PoseStamped>
+            ("mavros/local_position/pose", 10, &UAVWaypointControl::cur_pose_cb, this);
+    m_init_local_pos_sub = m_nh.subscribe<geometry_msgs::PoseStamped>
+            ("mavros/local_position/pose", 10, &UAVWaypointControl::init_pose_cb, this);
+
+    // Publisher
+    m_local_pos_pub = m_nh.advertise<geometry_msgs::PoseStamped>
+            ("mavros/setpoint_position/local", 10);
+
+    // m_arming_client = m_nh.serviceClient<mavros_msgs::CommandBool>
+    //         ("mavros/cmd/arming");
+    // m_set_mode_client = m_nh.serviceClient<mavros_msgs::SetMode>
+    //         ("mavros/set_mode");
+
+    //the setpoint publishing rate MUST be faster than 2Hz
+    // ros::Rate rate(20.0);
+
+    //send a few setpoints before starting
+    // for(int i = 100; ros::ok() && i > 0; --i){
+    //     geometry_msgs::PoseStamped pose;
+    //     pose.pose.position.x = 0;
+    //     pose.pose.position.y = 0;
+    //     pose.pose.position.z = 5;
+    //     m_local_pos_pub.publish(pose);
+    //     ros::spinOnce();
+    //     rate.sleep();
+    // }
+
+    // wait for FCU connection
+    // while(ros::ok() && m_current_state.connected){
+    //     ros::spinOnce();
+    //     rate.sleep();
+    // }
+
+    // mavros_msgs::SetMode offb_set_mode;
+    // offb_set_mode.request.custom_mode = "OFFBOARD";
+
+    // mavros_msgs::CommandBool arm_cmd;
+    // arm_cmd.request.value = true;
+
+    // ros::Time last_request = ros::Time::now();
+
+    // if( m_current_state.mode != "OFFBOARD" &&
+    //     (ros::Time::now() - last_request > ros::Duration(5.0))){
+    //     if( m_set_mode_client.call(offb_set_mode) &&
+    //         offb_set_mode.response.success){
+    //         ROS_INFO("Offboard enabled");
+    //     }
+    //     last_request = ros::Time::now();
+    // } else {
+    //     if( !m_current_state.armed &&
+    //         (ros::Time::now() - last_request > ros::Duration(5.0))){
+    //         if( m_arming_client.call(arm_cmd) &&
+    //             arm_cmd.response.success){
+    //             ROS_INFO("Vehicle armed");
+    //         }
+    //         last_request = ros::Time::now();
+    //     }
+    // }
 }
 
-void cur_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg) {
-    current_pose = *msg;
+
+void UAVWaypointControl::state_cb(const mavros_msgs::State::ConstPtr& msg){
+    m_current_state = *msg;
 }
 
-void init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg) {
-    if (init_local_pose_check) {
-        init_pose = *msg;
+void UAVWaypointControl::cur_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg) {
+    m_current_pose = *msg;
+}
+
+void UAVWaypointControl::init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg) {
+    if (m_init_local_pose_check) {
+        geometry_msgs::PoseStamped init_pose = *msg;
 
         for(int i = 0; i < 5; i++){
             geometry_msgs::PoseStamped temp_target_pose;
@@ -83,103 +141,50 @@ void init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg) {
                 temp_target_pose.pose.position.z = init_pose.pose.position.z + 8;
             }
 
-            waypoint_pose.push_back(temp_target_pose);
+            m_waypoint_pose.push_back(temp_target_pose);
         }
 
-        init_local_pose_check = false;
+        m_init_local_pose_check = false;
+    }
+
+    publish_waypoint();
+
+    ros::Rate rate(20.0);
+    rate.sleep();
+}
+
+void UAVWaypointControl::publish_waypoint() {
+    if (!m_init_local_pose_check) {
+        m_local_pos_pub.publish(m_waypoint_pose[m_waypoint_count]);
+        if (m_verbal_flag) {
+            double dist = sqrt(
+                (m_current_pose.pose.position.x-m_waypoint_pose[m_waypoint_count].pose.position.x)* 
+                (m_current_pose.pose.position.x-m_waypoint_pose[m_waypoint_count].pose.position.x) + 
+                (m_current_pose.pose.position.y-m_waypoint_pose[m_waypoint_count].pose.position.y)* 
+                (m_current_pose.pose.position.y-m_waypoint_pose[m_waypoint_count].pose.position.y) + 
+                (m_current_pose.pose.position.z-m_waypoint_pose[m_waypoint_count].pose.position.z)* 
+                (m_current_pose.pose.position.z-m_waypoint_pose[m_waypoint_count].pose.position.z)); 
+            ROS_INFO("distance: %.2f", dist);
+        }
+        
+        if (abs(m_current_pose.pose.position.x - m_waypoint_pose[m_waypoint_count].pose.position.x) < 0.5 && 
+            abs(m_current_pose.pose.position.y - m_waypoint_pose[m_waypoint_count].pose.position.y) < 0.5 &&
+            abs(m_current_pose.pose.position.z - m_waypoint_pose[m_waypoint_count].pose.position.z) < 0.5) {
+            m_waypoint_count += 1;
+
+            // ROS_INFO("m_waypoint_count = %d, cur_pos = (%.2f, %.2f, %.2f), next_pos = (%.2f, %.2f, %.2f)", m_waypoint_count, 
+            //     m_current_pose.pose.position.x, m_current_pose.pose.position.y, m_current_pose.pose.position.z, 
+            //     m_waypoint_pose[m_waypoint_count].pose.position.x, m_waypoint_pose[m_waypoint_count].pose.position.y, m_waypoint_pose[m_waypoint_count].pose.position.z);
+        }
     }
 }
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "offb_node");
-    ros::NodeHandle nh;
+    UAVWaypointControl mp;
 
-    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
-            ("mavros/state", 10, state_cb);
-    ros::Subscriber local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>
-            ("mavros/local_position/pose", 10, cur_pose_cb);
-    ros::Subscriber init_local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>
-            ("mavros/local_position/pose", 10, init_pose_cb);
-    ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
-            ("mavros/setpoint_position/local", 10);
-    // ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
-    //         ("mavros/cmd/arming");
-    // ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
-    //         ("mavros/set_mode");
-
-    //the setpoint publishing rate MUST be faster than 2Hz
-    ros::Rate rate(20.0);
-
-    // wait for FCU connection
-    while(ros::ok() && current_state.connected){
-        ros::spinOnce();
-        rate.sleep();
-    }
-
-    //send a few setpoints before starting
-    for(int i = 100; ros::ok() && i > 0; --i){
-        geometry_msgs::PoseStamped pose;
-        pose.pose.position.x = 0;
-        pose.pose.position.y = 0;
-        pose.pose.position.z = 5;
-        local_pos_pub.publish(pose);
-        ros::spinOnce();
-        rate.sleep();
-    }
-
-    // mavros_msgs::SetMode offb_set_mode;
-    // offb_set_mode.request.custom_mode = "OFFBOARD";
-
-    // mavros_msgs::CommandBool arm_cmd;
-    // arm_cmd.request.value = true;
-
-    ros::Time last_request = ros::Time::now();
-
-    while(ros::ok()){
-        // if( current_state.mode != "OFFBOARD" &&
-        //     (ros::Time::now() - last_request > ros::Duration(5.0))){
-        //     if( set_mode_client.call(offb_set_mode) &&
-        //         offb_set_mode.response.success){
-        //         ROS_INFO("Offboard enabled");
-        //     }
-        //     last_request = ros::Time::now();
-        // } else {
-        //     if( !current_state.armed &&
-        //         (ros::Time::now() - last_request > ros::Duration(5.0))){
-        //         if( arming_client.call(arm_cmd) &&
-        //             arm_cmd.response.success){
-        //             ROS_INFO("Vehicle armed");
-        //         }
-        //         last_request = ros::Time::now();
-        //     }
-        // }
-
-        if (!init_local_pose_check) {
-            local_pos_pub.publish(waypoint_pose[waypoint_count]);
-            double dist = sqrt(
-                (current_pose.pose.position.x-waypoint_pose[waypoint_count].pose.position.x)* 
-                (current_pose.pose.position.x-waypoint_pose[waypoint_count].pose.position.x) + 
-                (current_pose.pose.position.y-waypoint_pose[waypoint_count].pose.position.y)* 
-                (current_pose.pose.position.y-waypoint_pose[waypoint_count].pose.position.y) + 
-                (current_pose.pose.position.z-waypoint_pose[waypoint_count].pose.position.z)* 
-                (current_pose.pose.position.z-waypoint_pose[waypoint_count].pose.position.z)); 
-            ROS_INFO("distance: %.2f", dist);
-            
-            if (abs(current_pose.pose.position.x - waypoint_pose[waypoint_count].pose.position.x) < 0.5 && 
-                abs(current_pose.pose.position.y - waypoint_pose[waypoint_count].pose.position.y) < 0.5 &&
-                abs(current_pose.pose.position.z - waypoint_pose[waypoint_count].pose.position.z) < 0.5) {
-                waypoint_count += 1;
-
-                // ROS_INFO("waypoint_count = %d, cur_pos = (%.2f, %.2f, %.2f), next_pos = (%.2f, %.2f, %.2f)", waypoint_count, 
-                //     current_pose.pose.position.x, current_pose.pose.position.y, current_pose.pose.position.z, 
-                //     waypoint_pose[waypoint_count].pose.position.x, waypoint_pose[waypoint_count].pose.position.y, waypoint_pose[waypoint_count].pose.position.z);
-            }
-        }
-
-        ros::spinOnce();
-        rate.sleep();
-    }
+    ros::spin();
 
     return 0;
 }
