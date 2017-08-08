@@ -7,7 +7,7 @@
 #include "uav_control/UAVWaypointControl.hpp"
 
 UAVWaypointControl::UAVWaypointControl() :
-m_verbal_flag(false), m_init_local_pose_check(true), m_priv_nh("~")
+m_verbal_flag(false), m_init_local_pose_check(true), m_waypoint_count(0), m_priv_nh("~")
 {
     m_priv_nh.getParam("verbal_flag", m_verbal_flag);
 
@@ -73,6 +73,8 @@ m_verbal_flag(false), m_init_local_pose_check(true), m_priv_nh("~")
     //         last_request = ros::Time::now();
     //     }
     // }
+
+    get_waypoint();
 }
 
 
@@ -86,60 +88,12 @@ void UAVWaypointControl::cur_pose_cb(const geometry_msgs::PoseStamped::ConstPtr&
 
 void UAVWaypointControl::init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg) {
     if (m_init_local_pose_check) {
-        geometry_msgs::PoseStamped init_pose = *msg;
-
-        for(int i = 0; i < 5; i++){
+        for(int i = 0; i < m_num_waypoint; i++){
             geometry_msgs::PoseStamped temp_target_pose;
-            if(i == 0){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 0;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 0;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 5;
-            }
-            else if(i == 1){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 10;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 0;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 5;
-            }
-            else if(i == 2){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 10;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 10;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 5;
-            }
-            else if(i == 3){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 0;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 10;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 5;
-            }
-            else if(i == 4){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 0;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 0;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 5;
-            }
-            else if(i == 5){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 0;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 0;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 8;
-            }
-            else if(i == 6){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 10;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 0;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 8;
-            }
-            else if(i == 7){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 10;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 10;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 8;
-            }
-            else if(i == 8){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 0;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 10;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 8;
-            }
-            else if(i == 9){
-                temp_target_pose.pose.position.x = init_pose.pose.position.x + 0;
-                temp_target_pose.pose.position.y = init_pose.pose.position.y + 0;
-                temp_target_pose.pose.position.z = init_pose.pose.position.z + 8;
-            }
+
+            temp_target_pose.pose.position.x = msg->pose.position.x + m_x_pos[i];
+            temp_target_pose.pose.position.y = msg->pose.position.y + m_y_pos[i];
+            temp_target_pose.pose.position.z = msg->pose.position.z + m_z_pos[i];
 
             m_waypoint_pose.push_back(temp_target_pose);
         }
@@ -151,6 +105,36 @@ void UAVWaypointControl::init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr
 
     ros::Rate rate(20.0);
     rate.sleep();
+}
+
+void UAVWaypointControl::get_waypoint() {
+    if (ros::param::get("offb_node/num_waypoint", m_num_waypoint)) {}
+    else {
+        ROS_WARN("Didn't find num_waypoint");
+    }
+    if (ros::param::get("offb_node/x_pos", m_x_pos)) {}
+    else {
+        ROS_WARN("Didn't find x_pos");
+    }
+    if (ros::param::get("offb_node/y_pos", m_y_pos)) {}
+    else {
+        ROS_WARN("Didn't find y_pos");
+    }
+    if (ros::param::get("offb_node/z_pos", m_z_pos)) {}
+    else {
+        ROS_WARN("Didn't find z_pos");
+    }
+
+    //Safety check in case wrong waypoints are fed.
+    if (m_x_pos.size() != m_num_waypoint) {
+        ROS_WARN("Wrong x_pos values.");
+    }
+    if (m_y_pos.size() != m_num_waypoint) {
+        ROS_WARN("Wrong y_pos values.");
+    }
+    if (m_z_pos.size() != m_num_waypoint) {
+        ROS_WARN("Wrong z_pos values.");
+    }
 }
 
 void UAVWaypointControl::publish_waypoint() {
@@ -170,7 +154,12 @@ void UAVWaypointControl::publish_waypoint() {
         if (abs(m_current_pose.pose.position.x - m_waypoint_pose[m_waypoint_count].pose.position.x) < 0.5 && 
             abs(m_current_pose.pose.position.y - m_waypoint_pose[m_waypoint_count].pose.position.y) < 0.5 &&
             abs(m_current_pose.pose.position.z - m_waypoint_pose[m_waypoint_count].pose.position.z) < 0.5) {
+
             m_waypoint_count += 1;
+
+            if (m_waypoint_count >= m_num_waypoint) {
+                m_waypoint_count = m_waypoint_count - 1;
+            }
 
             // ROS_INFO("m_waypoint_count = %d, cur_pos = (%.2f, %.2f, %.2f), next_pos = (%.2f, %.2f, %.2f)", m_waypoint_count, 
             //     m_current_pose.pose.position.x, m_current_pose.pose.position.y, m_current_pose.pose.position.z, 

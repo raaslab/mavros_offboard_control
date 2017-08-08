@@ -1,6 +1,6 @@
 <launch>
   <node type="uav_waypoint" pkg="uav_control" name="offb_node" output="screen">
   	<param name="verbal_flag" type="bool" value="true" />
-    <!--<rosparam file="$(find uav_control)/yaml/motion_primitive_points.yaml" command="load" />-->
+    <rosparam file="$(find uav_control)/yaml/waypoint_points.yaml" command="load" />
   </node>
 </launch>

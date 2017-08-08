@@ -34,6 +34,12 @@ private:
 	bool m_init_local_pose_check;
 	int m_waypoint_count;
 
+	// Waypoint points
+	int m_num_waypoint;
+	vector<double> m_x_pos;
+	vector<double> m_y_pos;
+	vector<double> m_z_pos;
+
 public:
 	UAVWaypointControl();
 
