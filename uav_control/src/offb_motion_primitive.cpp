@@ -7,7 +7,7 @@
 #include "uav_control/UAVMotionPrimitive.hpp"
 
 UAVMotionPrimitive::UAVMotionPrimitive() :
-m_motion_primitive_check(false), m_init_local_pose_check(true)
+m_motion_primitive_check(false), m_init_local_pose_check(true), m_nh("~")
 {
     // Subscriber
     m_state_sub = m_nh.subscribe<mavros_msgs::State>
@@ -27,6 +27,8 @@ m_motion_primitive_check(false), m_init_local_pose_check(true)
     //         ("mavros/cmd/arming");
     // m_set_mode_client = m_nh.serviceClient<mavros_msgs::SetMode>
     //         ("mavros/set_mode");
+
+    get_motion_primitive();
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(20.0);
@@ -125,38 +127,57 @@ void UAVMotionPrimitive::init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr
 }
 
 void UAVMotionPrimitive::motion_primitive_cb(const std_msgs::String::ConstPtr& msg) {
-    if(strcmp(msg->data.c_str(), "up") == 0){
-        m_waypoint_pose.pose.position.x = m_current_pose.pose.position.x + 0;
-        m_waypoint_pose.pose.position.y = m_current_pose.pose.position.y + 0;
-        m_waypoint_pose.pose.position.z = m_current_pose.pose.position.z + 5;
-    }
-    else if(strcmp(msg->data.c_str(), "down") == 0){
-        m_waypoint_pose.pose.position.x = m_current_pose.pose.position.x + 0;
-        m_waypoint_pose.pose.position.y = m_current_pose.pose.position.y + 0;
-        m_waypoint_pose.pose.position.z = m_current_pose.pose.position.z + -5;
-    }
-    else if(strcmp(msg->data.c_str(), "forward") == 0){
-        m_waypoint_pose.pose.position.x = m_current_pose.pose.position.x + 0;
-        m_waypoint_pose.pose.position.y = m_current_pose.pose.position.y + 5;
-        m_waypoint_pose.pose.position.z = m_current_pose.pose.position.z + 0;
-    }
-    else if(strcmp(msg->data.c_str(), "backward") == 0){
-        m_waypoint_pose.pose.position.x = m_current_pose.pose.position.x + 0;
-        m_waypoint_pose.pose.position.y = m_current_pose.pose.position.y + -5;
-        m_waypoint_pose.pose.position.z = m_current_pose.pose.position.z + 0;
-    }
-    else if(strcmp(msg->data.c_str(), "right") == 0){
-        m_waypoint_pose.pose.position.x = m_current_pose.pose.position.x + 5;
-        m_waypoint_pose.pose.position.y = m_current_pose.pose.position.y + 0;
-        m_waypoint_pose.pose.position.z = m_current_pose.pose.position.z + 0;
-    }
-    else if(strcmp(msg->data.c_str(), "left") == 0){
-        m_waypoint_pose.pose.position.x = m_current_pose.pose.position.x + -5;
-        m_waypoint_pose.pose.position.y = m_current_pose.pose.position.y + 0;
-        m_waypoint_pose.pose.position.z = m_current_pose.pose.position.z + 0;
+    for (int i = 0; i < m_num_motion_primitive; i++) {
+        if(strcmp(msg->data.c_str(), m_names[i].c_str()) == 0) {
+            m_waypoint_pose.pose.position.x = m_current_pose.pose.position.x + m_x_pos[i];
+            m_waypoint_pose.pose.position.y = m_current_pose.pose.position.y + m_y_pos[i];
+            m_waypoint_pose.pose.position.z = m_current_pose.pose.position.z + m_z_pos[i];
+        }
     }
 
     m_motion_primitive_check = true;
+}
+
+void UAVMotionPrimitive::get_motion_primitive() {
+    int temp_num = 0;
+    if (ros::param::get("offb_node/num_motion_primitive", temp_num)) {
+        m_num_motion_primitive = temp_num;
+
+        for (int i = 0; i < temp_num; i++) {
+            string temp_name;
+            double temp_x_pos = 0.0;
+            double temp_y_pos = 0.0;
+            double temp_z_pos = 0.0;
+
+            if (ros::param::get("offb_node/names", temp_name)) {
+                m_names.push_back(temp_name);
+            }
+            else {
+                ROS_WARN("Didn't find names");
+            }
+            if (ros::param::get("offb_node/x_pos", temp_x_pos)) {
+                m_x_pos.push_back(temp_x_pos);
+            }
+            else {
+                ROS_WARN("Didn't find x_pos");
+            }
+            if (ros::param::get("offb_node/y_pos", temp_y_pos)) {
+                m_y_pos.push_back(temp_y_pos);
+            }
+            else {
+                ROS_WARN("Didn't find y_pos");
+            }
+            if (ros::param::get("offb_node/z_pos", temp_z_pos)) {
+                m_z_pos.push_back(temp_z_pos);
+            }
+            else {
+                ROS_WARN("Didn't find z_pos");
+            }
+        }
+    }
+    else {
+        ROS_WARN("Didn't find num_motion_primitive");
+    }
 }
 
 int main(int argc, char **argv)

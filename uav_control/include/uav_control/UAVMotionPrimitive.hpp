@@ -8,6 +8,7 @@
 // #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -23,7 +24,7 @@ private:
 
 	//Publisher
 	ros::Publisher m_local_pos_pub;
-	
+
 	// ros::ServiceClient m_arming_client;
 	// ros::ServiceClient m_set_mode_client;
 
@@ -33,6 +34,13 @@ private:
 	bool m_motion_primitive_check;
 	bool m_init_local_pose_check;
 
+	// Motion primitives
+	int m_num_motion_primitive;
+	vector<string> m_names;
+	vector<double> m_x_pos;
+	vector<double> m_y_pos;
+	vector<double> m_z_pos;
+
 public:
 	UAVMotionPrimitive();
 
@@ -40,6 +48,7 @@ public:
 	void cur_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
 	void init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
 	void motion_primitive_cb(const std_msgs::String::ConstPtr& msg);
+	void get_motion_primitive();
 };
 
 #endif
