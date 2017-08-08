@@ -7,13 +7,13 @@ The initial position of the quad when you use this package is given by the momen
 
 Run mavros px4.launch with the usb port setting first. (This package does not contain mavros itself.)
 
-1. Waypoint control
+# 1. Waypoint control
 
 You can set waypoints using `waypoint_points.yaml`  in the yaml folder. At the end of the algorithm, the quad remains in the position of the last waypoint you give.
 
 Then, run `roslaunch uav_control waypoint_control.launch`.
 
-2. Motion primitive
+# 2. Motion primitive
 
 You can set motion primitives using `motion_primitive_points.yaml` in the yaml folder.
 
