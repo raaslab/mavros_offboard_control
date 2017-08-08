@@ -32,7 +32,7 @@ include_directories(
 
 #add_executable(uav_control_node src/UAVSpiralMotion.cpp)
 add_executable(uav_take_off src/UAVTakeoff.cpp)
-add_executable(uav_square_waypoint src/UAVWaypointControl.cpp)
+add_executable(uav_waypoint src/UAVWaypointControl.cpp)
 add_executable(uav_motion_primitive src/UAVMotionPrimitive.cpp)
 
 # add_dependencies(uav_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -41,7 +41,7 @@ add_executable(uav_motion_primitive src/UAVMotionPrimitive.cpp)
 target_link_libraries(uav_take_off
   ${catkin_LIBRARIES}
 )
-target_link_libraries(uav_square_waypoint
+target_link_libraries(uav_waypoint
   ${catkin_LIBRARIES}
 )
 target_link_libraries(uav_motion_primitive
