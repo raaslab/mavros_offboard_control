@@ -1,0 +1,5 @@
+<launch>
+  <node type="uav_motion_primitive" pkg="uav_control" name="offb_node" output="screen">
+    <rosparam file="$(find uav_control)/yaml/motion_primitive_points.yaml" command="load" />
+  </node>
+</launch>
