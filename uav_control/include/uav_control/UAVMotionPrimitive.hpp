@@ -49,6 +49,7 @@ public:
 	void init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
 	void motion_primitive_cb(const std_msgs::String::ConstPtr& msg);
 	void get_motion_primitive();
+	void publish_motion_primitive();
 };
 
 #endif

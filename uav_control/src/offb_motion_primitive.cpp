@@ -7,7 +7,7 @@
 #include "uav_control/UAVMotionPrimitive.hpp"
 
 UAVMotionPrimitive::UAVMotionPrimitive() :
-m_motion_primitive_check(false), m_init_local_pose_check(true), m_nh("~")
+m_motion_primitive_check(false), m_init_local_pose_check(true)
 {
     // Subscriber
     m_state_sub = m_nh.subscribe<mavros_msgs::State>
@@ -28,27 +28,25 @@ m_motion_primitive_check(false), m_init_local_pose_check(true), m_nh("~")
     // m_set_mode_client = m_nh.serviceClient<mavros_msgs::SetMode>
     //         ("mavros/set_mode");
 
-    get_motion_primitive();
-
     //the setpoint publishing rate MUST be faster than 2Hz
-    ros::Rate rate(20.0);
+    // ros::Rate rate(20.0);
 
     //send a few setpoints before starting
-    for(int i = 100; ros::ok() && i > 0; --i){
-        geometry_msgs::PoseStamped pose;
-        pose.pose.position.x = 0;
-        pose.pose.position.y = 0;
-        pose.pose.position.z = 5;
-        m_local_pos_pub.publish(pose);
-        ros::spinOnce();
-        rate.sleep();
-    }
+    // for(int i = 100; ros::ok() && i > 0; --i){
+    //     geometry_msgs::PoseStamped pose;
+    //     pose.pose.position.x = 0;
+    //     pose.pose.position.y = 0;
+    //     pose.pose.position.z = 5;
+    //     m_local_pos_pub.publish(pose);
+    //     ros::spinOnce();
+    //     rate.sleep();
+    // }
 
     // wait for FCU connection
-    while(ros::ok() && m_current_state.connected){
-        ros::spinOnce();
-        rate.sleep();
-    }
+    // while(ros::ok() && m_current_state.connected){
+    //     ros::spinOnce();
+    //     rate.sleep();
+    // }
 
     // mavros_msgs::SetMode offb_set_mode;
     // offb_set_mode.request.custom_mode = "OFFBOARD";
@@ -56,58 +54,27 @@ m_motion_primitive_check(false), m_init_local_pose_check(true), m_nh("~")
     // mavros_msgs::CommandBool arm_cmd;
     // arm_cmd.request.value = true;
 
-    ros::Time last_request = ros::Time::now();
+    // ros::Time last_request = ros::Time::now();
 
-    while(ros::ok()){
-        // if( m_current_state.mode != "OFFBOARD" &&
-        //     (ros::Time::now() - last_request > ros::Duration(5.0))){
-        //     if( m_set_mode_client.call(offb_set_mode) &&
-        //         offb_set_mode.response.success){
-        //         ROS_INFO("Offboard enabled");
-        //     }
-        //     last_request = ros::Time::now();
-        // } else {
-        //     if( !m_current_state.armed &&
-        //         (ros::Time::now() - last_request > ros::Duration(5.0))){
-        //         if( m_arming_client.call(arm_cmd) &&
-        //             arm_cmd.response.success){
-        //             ROS_INFO("Vehicle armed");
-        //         }
-        //         last_request = ros::Time::now();
-        //     }
-        // }
+    // if( m_current_state.mode != "OFFBOARD" &&
+    //     (ros::Time::now() - last_request > ros::Duration(5.0))){
+    //     if( m_set_mode_client.call(offb_set_mode) &&
+    //         offb_set_mode.response.success){
+    //         ROS_INFO("Offboard enabled");
+    //     }
+    //     last_request = ros::Time::now();
+    // } else {
+    //     if( !m_current_state.armed &&
+    //         (ros::Time::now() - last_request > ros::Duration(5.0))){
+    //         if( m_arming_client.call(arm_cmd) &&
+    //             arm_cmd.response.success){
+    //             ROS_INFO("Vehicle armed");
+    //         }
+    //         last_request = ros::Time::now();
+    //     }
+    // }
 
-        if (m_motion_primitive_check) { // Motion primitive is applied.
-            m_local_pos_pub.publish(m_waypoint_pose);
-            double dist = sqrt(
-                (m_current_pose.pose.position.x-m_waypoint_pose.pose.position.x)* 
-                (m_current_pose.pose.position.x-m_waypoint_pose.pose.position.x) + 
-                (m_current_pose.pose.position.y-m_waypoint_pose.pose.position.y)* 
-                (m_current_pose.pose.position.y-m_waypoint_pose.pose.position.y) + 
-                (m_current_pose.pose.position.z-m_waypoint_pose.pose.position.z)* 
-                (m_current_pose.pose.position.z-m_waypoint_pose.pose.position.z)); 
-            ROS_INFO("distance: %.2f", dist);
-            
-            if (abs(m_current_pose.pose.position.x - m_waypoint_pose.pose.position.x) < 0.5 && 
-                abs(m_current_pose.pose.position.y - m_waypoint_pose.pose.position.y) < 0.5 &&
-                abs(m_current_pose.pose.position.z - m_waypoint_pose.pose.position.z) < 0.5) {
-                ROS_INFO("Now you can apply the next motion primitive.");
-                // waypoint_count += 1;
-
-                // ROS_INFO("waypoint_count = %d, cur_pos = (%.2f, %.2f, %.2f), next_pos = (%.2f, %.2f, %.2f)", waypoint_count, 
-                //     m_current_pose.pose.position.x, m_current_pose.pose.position.y, m_current_pose.pose.position.z, 
-                //     m_waypoint_pose[waypoint_count].pose.position.x, m_waypoint_pose[waypoint_count].pose.position.y, m_waypoint_pose[waypoint_count].pose.position.z);
-            }
-        }
-        else { // Motion primitive is not obtained yet.
-            if (!m_init_local_pose_check) {
-                m_local_pos_pub.publish(m_waypoint_pose);
-            }
-        }
-
-        ros::spinOnce();
-        rate.sleep();
-    }
+    get_motion_primitive();
 }
 
 void UAVMotionPrimitive::state_cb(const mavros_msgs::State::ConstPtr& msg){
@@ -124,6 +91,11 @@ void UAVMotionPrimitive::init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr
 
         m_init_local_pose_check = false;
     }
+
+    publish_motion_primitive();
+
+    ros::Rate rate(20.0);
+    rate.sleep();
 }
 
 void UAVMotionPrimitive::motion_primitive_cb(const std_msgs::String::ConstPtr& msg) {
@@ -161,10 +133,42 @@ void UAVMotionPrimitive::get_motion_primitive() {
     }
 }
 
+void UAVMotionPrimitive::publish_motion_primitive() {
+    if (m_motion_primitive_check) { // Motion primitive is applied.
+        m_local_pos_pub.publish(m_waypoint_pose);
+        double dist = sqrt(
+            (m_current_pose.pose.position.x-m_waypoint_pose.pose.position.x)* 
+            (m_current_pose.pose.position.x-m_waypoint_pose.pose.position.x) + 
+            (m_current_pose.pose.position.y-m_waypoint_pose.pose.position.y)* 
+            (m_current_pose.pose.position.y-m_waypoint_pose.pose.position.y) + 
+            (m_current_pose.pose.position.z-m_waypoint_pose.pose.position.z)* 
+            (m_current_pose.pose.position.z-m_waypoint_pose.pose.position.z)); 
+        ROS_INFO("distance: %.2f", dist);
+        
+        if (abs(m_current_pose.pose.position.x - m_waypoint_pose.pose.position.x) < 0.5 && 
+            abs(m_current_pose.pose.position.y - m_waypoint_pose.pose.position.y) < 0.5 &&
+            abs(m_current_pose.pose.position.z - m_waypoint_pose.pose.position.z) < 0.5) {
+            ROS_INFO("Now you can apply the next motion primitive.");
+
+            ROS_INFO("target_pos = (%.2f, %.2f, %.2f)", m_waypoint_pose.pose.position.x,
+                m_waypoint_pose.pose.position.y, m_waypoint_pose.pose.position.z);
+        }
+    }
+    else { // Motion primitive is not obtained yet.
+        if (!m_init_local_pose_check) {
+            m_local_pos_pub.publish(m_waypoint_pose);
+
+            ROS_INFO("target_pos = (%.2f, %.2f, %.2f)", m_waypoint_pose.pose.position.x,
+                m_waypoint_pose.pose.position.y, m_waypoint_pose.pose.position.z);
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "offb_node");
     UAVMotionPrimitive mp;
 
+    ros::spin();
     return 0;
 }
