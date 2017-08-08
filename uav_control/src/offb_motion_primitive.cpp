@@ -61,7 +61,7 @@ m_motion_primitive_check(false), m_init_local_pose_check(true), m_nh("~")
     while(ros::ok()){
         // if( m_current_state.mode != "OFFBOARD" &&
         //     (ros::Time::now() - last_request > ros::Duration(5.0))){
-        //     if( set_mode_client.call(offb_set_mode) &&
+        //     if( m_set_mode_client.call(offb_set_mode) &&
         //         offb_set_mode.response.success){
         //         ROS_INFO("Offboard enabled");
         //     }
@@ -69,7 +69,7 @@ m_motion_primitive_check(false), m_init_local_pose_check(true), m_nh("~")
         // } else {
         //     if( !m_current_state.armed &&
         //         (ros::Time::now() - last_request > ros::Duration(5.0))){
-        //         if( arming_client.call(arm_cmd) &&
+        //         if( m_arming_client.call(arm_cmd) &&
         //             arm_cmd.response.success){
         //             ROS_INFO("Vehicle armed");
         //         }
@@ -139,44 +139,25 @@ void UAVMotionPrimitive::motion_primitive_cb(const std_msgs::String::ConstPtr& m
 }
 
 void UAVMotionPrimitive::get_motion_primitive() {
-    int temp_num = 0;
-    if (ros::param::get("offb_node/num_motion_primitive", temp_num)) {
-        m_num_motion_primitive = temp_num;
-
-        for (int i = 0; i < temp_num; i++) {
-            string temp_name;
-            double temp_x_pos = 0.0;
-            double temp_y_pos = 0.0;
-            double temp_z_pos = 0.0;
-
-            if (ros::param::get("offb_node/names", temp_name)) {
-                m_names.push_back(temp_name);
-            }
-            else {
-                ROS_WARN("Didn't find names");
-            }
-            if (ros::param::get("offb_node/x_pos", temp_x_pos)) {
-                m_x_pos.push_back(temp_x_pos);
-            }
-            else {
-                ROS_WARN("Didn't find x_pos");
-            }
-            if (ros::param::get("offb_node/y_pos", temp_y_pos)) {
-                m_y_pos.push_back(temp_y_pos);
-            }
-            else {
-                ROS_WARN("Didn't find y_pos");
-            }
-            if (ros::param::get("offb_node/z_pos", temp_z_pos)) {
-                m_z_pos.push_back(temp_z_pos);
-            }
-            else {
-                ROS_WARN("Didn't find z_pos");
-            }
-        }
-    }
+    if (ros::param::get("offb_node/num_motion_primitive", m_num_motion_primitive)) {}
     else {
         ROS_WARN("Didn't find num_motion_primitive");
+    }
+    if (ros::param::get("offb_node/names", m_names)) {}
+    else {
+        ROS_WARN("Didn't find names");
+    }
+    if (ros::param::get("offb_node/x_pos", m_x_pos)) {}
+    else {
+        ROS_WARN("Didn't find x_pos");
+    }
+    if (ros::param::get("offb_node/y_pos", m_y_pos)) {}
+    else {
+        ROS_WARN("Didn't find y_pos");
+    }
+    if (ros::param::get("offb_node/z_pos", m_z_pos)) {}
+    else {
+        ROS_WARN("Didn't find z_pos");
     }
 }
 
