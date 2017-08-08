@@ -30,10 +30,10 @@ include_directories(
 
 # add_dependencies(uav_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-#add_executable(uav_control_node src/offb_spiral_node.cpp)
-add_executable(uav_take_off src/offb_take_off_node.cpp)
-add_executable(uav_square_waypoint src/offb_square_node.cpp)
-add_executable(uav_motion_primitive src/offb_motion_primitive.cpp)
+#add_executable(uav_control_node src/UAVSpiralMotion.cpp)
+add_executable(uav_take_off src/UAVTakeoff.cpp)
+add_executable(uav_square_waypoint src/UAVWaypointControl.cpp)
+add_executable(uav_motion_primitive src/UAVMotionPrimitive.cpp)
 
 # add_dependencies(uav_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
