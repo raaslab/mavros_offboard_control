@@ -28,7 +28,8 @@ def main():
 	print("\nTakeoff")
 	rospy.wait_for_service("/mavros/cmd/takeoff")
 	rospy.loginfo("Takeoff UAV")
-	uav_takeoff = rospy.ServiceProsy("/mavros/cmd/takeoff", 
+	uav_takeoff = rospy.ServiceProxy("/mavros/cmd/takeoff", mavros.srv.CommandTOL)
+	
 	
 	#Clearing waypoints
 	print("\nClearing")
