@@ -15,52 +15,63 @@ def main():
 	rospy.init_node('wayPoint')
 	rospy.Subscriber("/mavros/mission/waypoints", WaypointList, waypoint_callback)
 	
-	#Arming
-	print("\nArming")
-	rospy.wait_for_service("/mavros/cmd/arming")
-	rospy.loginfo("Arming UAV")
-	uav_arm = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)
-	resp = uav_arm()
-	rospy.loginfo(resp)
-	rospy.sleep(5)
-	
-	#Takeoff
-	print("\nTakeoff")
-	rospy.wait_for_service("/mavros/cmd/takeoff")
-	rospy.loginfo("Takeoff UAV")
-	uav_takeoff = rospy.ServiceProsy("/mavros/cmd/takeoff", 
-	
 	#Clearing waypoints
 	print("\nClearing")
 	rospy.wait_for_service("/mavros/mission/clear")
-	rospy.loginfo("Clearing Waypoints")
+	print("Clearing Waypoints!!!")
 	waypoint_clear = rospy.ServiceProxy("/mavros/mission/clear", WaypointClear)
 	resp = waypoint_clear()
-	rospy.loginfo(resp)
+	print(resp)
+	rospy.sleep(5)
 
+	#Arming
+	print("\nArming")
+	rospy.wait_for_service("/mavros/cmd/arming")
+	print("Arming UAV!!!")
+	uav_arm = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)
+	resp = uav_arm(1)
+	print(resp)
+	#rospy.sleep(5)
+	
+	#Takeoff
+	#print("\nTakeoff")
+	#rospy.wait_for_service("/mavros/cmd/takeoff")
+	#print("Takeoff UAV!!!")
+	#uav_takeoff = rospy.ServiceProxy("/mavros/cmd/takeoff", CommandTOL)
+	#resp = uav_takeoff()
+	#print(resp)
+	#rospy.sleep(5)
+	
 	#Sending waypoints_push
 	print("\nPushing")
-	rospy.loginfo("Waiting for MAVROS service...")
+	print("Waiting for MAVROS service...")
 	rospy.wait_for_service("/mavros/mission/push")
 	
 	waypoints = [
-		Waypoint(frame = 3, command = 22, is_current = True,
-				 x_lat = 44, y_long = -123, z_alt = 3.0),
+		Waypoint(frame = 3, command = 16, is_current = True,
+				 x_lat = 47.3978422, y_long = 8.5455939, z_alt = 488.02),
 	]
 	
 	waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
 	resp = waypoint_push(waypoints)
-	rospy.loginfo(resp)
-	
+	print(resp)
+	rospy.sleep(5)
+
+
 	#Call waypoints_pull
 	print("\nPulling")
 	rospy.wait_for_service("/mavros/mission/pull")
-	rospy.loginfo("Calling Waypoint_pull Service")
+	print("Calling Waypoint_pull Service")
 	waypoint_pull = rospy.ServiceProxy("/mavros/mission/pull", WaypointPull)
 	resp = waypoint_pull()
-	rospy.loginfo(resp)
-
+	print(resp)
+	rospy.sleep(5)
+	
+	print("\nbefore rospy.spin()")
 	rospy.spin()
+	print("\nafter rospy.spin()")
+	
+
 
 if __name__ == '__main__':
 	main()
