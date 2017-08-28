@@ -31,7 +31,16 @@ def main():
 	uav_arm = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)
 	resp = uav_arm(1)
 	print(resp)
-	#rospy.sleep(5)
+	rospy.sleep(5)
+	
+	#Switching Modes
+	print("\nSwitching to AUTO mode")
+	rospy.wait_for_service("/mavros/cmd/SetMode")
+	print("Switching to AUTO mode, same as mission!!!")
+	uav_mode_switch = rospy.ServiceProxy("/mavros/cmd/SetMode", SetMode)
+	resp = uav_mode_switch(220)
+	print(resp)
+	rospy.sleep(5)
 	
 	#Takeoff
 	#print("\nTakeoff")
