@@ -16,7 +16,7 @@ def main():
 	rospy.Subscriber("/mavros/mission/waypoints", WaypointList, waypoint_callback)
 	
 	#Clearing waypoints
-	print("\nClearing")
+	print("\n----------CLEARING----------")
 	rospy.wait_for_service("/mavros/mission/clear")
 	print("Clearing Waypoints!!!")
 	waypoint_clear = rospy.ServiceProxy("/mavros/mission/clear", WaypointClear)
@@ -24,8 +24,18 @@ def main():
 	print(resp)
 	rospy.sleep(5)
 
+	#Call waypoints_pull
+	print("\n----------PULLING----------")
+	rospy.wait_for_service("/mavros/mission/pull")
+	print("Calling Waypoint_pull Service")
+	waypoint_pull = rospy.ServiceProxy("/mavros/mission/pull", WaypointPull)
+	resp = waypoint_pull()
+	print(resp)
+	rospy.sleep(5)
+	
+
 	#Arming
-	print("\nArming")
+	print("\n----------ARMING----------")
 	rospy.wait_for_service("/mavros/cmd/arming")
 	print("Arming UAV!!!")
 	uav_arm = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)
@@ -34,13 +44,13 @@ def main():
 	rospy.sleep(5)
 	
 	#Switching Modes
-	print("\nSwitching to AUTO mode")
-	rospy.wait_for_service("/mavros/cmd/SetMode")
-	print("Switching to AUTO mode, same as mission!!!")
-	uav_mode_switch = rospy.ServiceProxy("/mavros/cmd/SetMode", SetMode)
-	resp = uav_mode_switch(220)
-	print(resp)
-	rospy.sleep(5)
+	#print("\nSwitching to AUTO mode")
+	#rospy.wait_for_service("/mavros/set_mode")
+	#print("Switching to AUTO mode, same as mission!!!")
+	#uav_mode_switch = rospy.ServiceProxy("/mavros/set_mode", SetMode)
+	#resp = uav_mode_switch(220)
+	#print(resp)
+	#rospy.sleep(5)
 	
 	#Takeoff
 	#print("\nTakeoff")
@@ -52,23 +62,26 @@ def main():
 	#rospy.sleep(5)
 	
 	#Sending waypoints_push
-	print("\nPushing")
+	print("\n----------PUSHING----------")
 	print("Waiting for MAVROS service...")
 	rospy.wait_for_service("/mavros/mission/push")
 	
 	waypoints = [
-		Waypoint(frame = 3, command = 16, is_current = True,
-				 x_lat = 47.3978422, y_long = 8.5455939, z_alt = 5),
+		Waypoint(frame = 3, command = 16, is_current = True, autocontinue = True, param1 = 5, x_lat = 47.3975922, y_long = 8.5455939, z_alt = 5),
+		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 47.3979922, y_long = 8.5455939, z_alt = 10)
+		#Waypoint(frame = 3, command = 16, is_current = True, autocontinue = True, param1 = 5, x_lat = 47.3978622, y_long = 8.5455939, z_alt = 15)
 	]
 	
 	waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
 	resp = waypoint_push(waypoints)
 	print(resp)
+	#print(waypoints)
 	rospy.sleep(5)
+	
 
 
 	#Call waypoints_pull
-	print("\nPulling")
+	print("\n----------PULLING----------")
 	rospy.wait_for_service("/mavros/mission/pull")
 	print("Calling Waypoint_pull Service")
 	waypoint_pull = rospy.ServiceProxy("/mavros/mission/pull", WaypointPull)
