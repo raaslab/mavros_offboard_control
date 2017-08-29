@@ -49,7 +49,7 @@ def main():
 	
 	waypoints = [
 		Waypoint(frame = 3, command = 16, is_current = True,
-				 x_lat = 47.3978422, y_long = 8.5455939, z_alt = 488.02),
+				 x_lat = 47.3978422, y_long = 8.5455939, z_alt = 5),
 	]
 	
 	waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
