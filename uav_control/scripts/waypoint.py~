@@ -18,9 +18,9 @@ altitude = 0.0
 def waypoint_callback(data):
 	print("\n----------\nwaypoint_callback")
 	rospy.loginfo("Got waypoint: %s", data)
-	#print(len(data.waypoints))
-	rospy.loginfo("is_current: %s", data.waypoints[1].param2)
-	print(data)
+#	print(len(data.waypoints))
+	rospy.loginfo("is_current: %s", data.waypoints[len(data.waypoints)].is_current)
+#	print(data)
 
 
 def globalPosition_callback(data):
