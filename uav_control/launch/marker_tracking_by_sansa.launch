@@ -1,0 +1,120 @@
+<launch>
+	<!-- Common Interface -->
+	<arg name="device" default="15291221"/>
+	<arg name="rate" default="60"/>
+
+	<!-- Camera Settings -->
+	<arg name="serial" default="$(arg device)"/>
+	<arg name="camera_name" default="pg_$(arg serial)"/>
+	<arg name="camera" default="$(arg camera_name)"/>
+	<arg name="frame_id" default="$(arg camera)"/>
+	<arg name="calib_url" default="file://${ROS_HOME}/camera_info/$(arg camera_name).yaml"/>
+	<arg name="fps" default="$(arg rate)"/>
+
+	<arg name="width" default="0"/>
+	<arg name="height" default="0"/>
+	<arg name="video_mode" default="23"/>
+	<arg name="pixel_format" default="31"/>
+	<arg name="exposure" default="true"/>
+	<arg name="auto_exposure" default="false"/>
+	<arg name="exposure_value" default="2.3"/>
+	<arg name="auto_shutter" default="true"/>
+	<arg name="shutter_ms" default="10.0"/>
+	<arg name="auto_gain" default="true"/>
+	<arg name="gain_db" default="0.0"/>
+	<arg name="trigger_source" default="-1"/>
+	<arg name="trigger_polarity" default="0"/>
+	<arg name="strobe_control" default="-1"/>
+	<arg name="strobe_polarity" default="0"/>
+	<arg name="white_balance" default="false"/>
+	<arg name="auto_white_balance" default="false"/>
+
+	<!-- Node Settings -->
+	<arg name="output" default="screen"/>
+	<arg name="proc" default="false"/>
+	<arg name="view" default="false"/>
+	<arg name="image" default="image_raw"/>
+	<arg name="calib" default="false"/>
+
+	<!-- Node -->
+	<node pkg="flea3" type="flea3_single_node" name="$(arg camera)" output="$(arg output)" required="true">
+		<param name="identifier" type="string" value="$(arg serial)"/>
+		<param name="frame_id" type="string" value="$(arg frame_id)"/>
+		<param name="camera_name" type="string" value="$(arg camera_name)"/>
+		<param name="calib_url" type="string" value="$(arg calib_url)"/>
+
+		<param name="fps" type="double" value="$(arg fps)"/>
+		<param name="video_mode" type="int" value="$(arg video_mode)"/>
+		<param name="pixel_format" type="int" value="$(arg pixel_format)"/>
+		<param name="exposure" type="bool" value="$(arg exposure)"/>
+		<param name="auto_exposure" type="bool" value="$(arg auto_exposure)"/>
+		<param name="auto_shutter" type="bool" value="$(arg auto_shutter)"/>
+		<param name="exposure_value" type="double" value="$(arg exposure_value)"/>
+		<param name="shutter_ms" type="double" value="$(arg shutter_ms)"/>
+		<param name="auto_gain" type="bool" value="$(arg auto_gain)"/>
+		<param name="gain_db" type="double" value="$(arg gain_db)"/>
+		<param name="trigger_source" type="int" value="$(arg trigger_source)"/>
+		<param name="trigger_polarity" type="int" value="$(arg trigger_polarity)"/>
+		<param name="strobe_control" type="int" value="$(arg strobe_control)"/>
+		<param name="strobe_polarity" type="int" value="$(arg strobe_polarity)"/>
+		<param name="white_balance" type="bool" value="$(arg white_balance)"/>
+		<param name="auto_white_balance" type="bool" value="$(arg auto_white_balance)"/>
+		<param name="width" type="int" value="$(arg width)"/>
+		<param name="height" type="int" value="$(arg height)"/>
+		<param name="white_balance" type="bool" value="$(arg white_balance)" />
+		<param name="auto_white_balance" type="bool" value="$(arg auto_white_balance)" />
+	</node>
+
+	<!-- vim: set ft=xml noet : -->
+	<!-- example launch script for PX4 based FCU's -->
+
+	<arg name="fcu_url" default="/dev/ttyUSB0:921600" />
+	<arg name="gcs_url" default="" />
+	<arg name="tgt_system" default="1" />
+	<arg name="tgt_component" default="1" />
+	<arg name="log_output" default="screen" />
+
+	<include file="$(find mavros)/launch/node.launch">
+		<arg name="pluginlists_yaml" value="$(find mavros_extras)/launch/px4_mocap_pluginlist.yaml" />
+		<arg name="config_yaml" value="$(find mavros_extras)/launch/px4_mocap_config.yaml" />
+
+		<arg name="fcu_url" value="$(arg fcu_url)" />
+		<arg name="gcs_url" value="$(arg gcs_url)" />
+		<arg name="tgt_system" value="$(arg tgt_system)" />
+		<arg name="tgt_component" value="$(arg tgt_component)" />
+		<arg name="log_output" value="$(arg log_output)" />
+	</include>
+
+	<!-- 
+	Start an apriltag node using the default settings
+	to connect to an OpenNI device (e.g. Kinect). 
+	-->
+	<node pkg="apriltags" type="apriltags" name="apriltags" required="true">
+		<param name="~default_tag_size" value="0.1621" />
+
+		<param name="~viewer" value="false" />
+		<param name="~publish_detections_image" value="false" />
+
+		<param name="~display_type" value="CUBE" />
+		<param name="~marker_thickness" value="0.02" />
+
+	<rosparam command="delete" param="tag_data" />
+
+		<remap from="~image" to="/pg_15291221/image_raw"/>
+		<remap from="~camera_info" to="/pg_15291221/camera_info"/>
+		<remap from="~marker_array" to="/apriltags/marker_array"/>
+		<remap from="~detections" to="/apriltags/detections"/>
+	</node>
+
+	<node pkg="tf_stamped"
+		type="stamped_tf"
+		name="stamped_tf"
+		respawn="false"
+		launch-prefix=""
+		required="true"
+		output="screen">
+	</node>
+	
+	<node name="tf_bcast" pkg="april_odom_tf" type="tf_bcast" output="screen" required="true"/>
+
+</launch>
