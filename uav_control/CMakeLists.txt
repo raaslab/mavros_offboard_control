@@ -34,6 +34,7 @@ include_directories(
 add_executable(uav_take_off src/UAVTakeoff.cpp)
 add_executable(uav_waypoint src/UAVWaypointControl.cpp)
 add_executable(uav_motion_primitive src/UAVMotionPrimitive.cpp)
+#add_executable(uav_marker_tracking src/UAVMarkerTracking.cpp)
 
 # add_dependencies(uav_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
