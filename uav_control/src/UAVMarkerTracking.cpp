@@ -18,7 +18,7 @@ m_verbal_flag(false), m_motion_primitive_check(false), m_init_local_pose_check(t
             ("mavros/local_position/pose", 10, &UAVMotionPrimitive::cur_pose_cb, this);
     m_init_local_pos_sub = m_nh.subscribe<geometry_msgs::PoseStamped>
             ("mavros/local_position/pose", 10, &UAVMotionPrimitive::init_pose_cb, this);
-    m_motion_primitive_sub = m_nh.subscribe<std_msgs::String>
+    m_motion_primitive_sub = m_nh.subscribe<apriltags::AprilTagDetections>
             ("mavros/motion_primitive", 10, &UAVMotionPrimitive::motion_primitive_cb, this);
 
     // Publisher
@@ -100,7 +100,7 @@ void UAVMotionPrimitive::init_pose_cb(const geometry_msgs::PoseStamped::ConstPtr
     rate.sleep();
 }
 
-void UAVMotionPrimitive::motion_primitive_cb(const std_msgs::String::ConstPtr& msg) {
+void UAVMotionPrimitive::motion_primitive_cb(const apriltags::AprilTagDetections::ConstPtr& msg) {
     for (int i = 0; i < m_num_motion_primitive; i++) {
         if(strcmp(msg->data.c_str(), m_names[i].c_str()) == 0) {
             m_waypoint_pose.pose.position.x = m_current_pose.pose.position.x + m_x_pos[i];

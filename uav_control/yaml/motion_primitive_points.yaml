@@ -6,6 +6,6 @@ num_motion_primitive: 6
 #This is applied from the current position of the quad. For example, if the current position of the quad is (1, 2, 3), 
 #this motion primitive will move the quad to (1, 2, 8).
 names: ['up', 'down', 'forward', 'backward', 'right', 'left']
-x_pos: [0, 0, 0, 0, 5, -5]
-y_pos: [0, 0, 5, -5, 0, 0]
-z_pos: [5, -5, 0, 0, 0, 0]
+x_pos: [0, 0, 0, 0, 3, -3]
+y_pos: [0, 0, 3, -3, 0, 0]
+z_pos: [3, -3, 0, 0, 0, 0]
