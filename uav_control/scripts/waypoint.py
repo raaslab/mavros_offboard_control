@@ -134,8 +134,8 @@ def main():
 			resp = waypoint_push(waypoints)
 			waypoints = [
 				Waypoint(frame = 3, command = 22, is_current = True, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
-				Waypoint(frame = 3, command = 16, is_current = True, autocontinue = True, param1 = 5, x_lat = 37.1972726, y_long = -80.5799733, z_alt = 5),
-				Waypoint(frame = 3, command = 21, is_current = True, autocontinue = True, param1 = 5, x_lat = 37.1971499, y_long = -80.5801173, z_alt = 0)
+				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1972726, y_long = -80.5799733, z_alt = 5),
+				Waypoint(frame = 3, command = 21, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1971499, y_long = -80.5801173, z_alt = 0)
 			]
 			resp = waypoint_push(waypoints)
 			print(resp)
