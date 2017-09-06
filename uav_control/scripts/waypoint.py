@@ -128,8 +128,8 @@ def main():
 		rospy.sleep(2)
 		print("WAITING for us to be within 1 meter of the next takeoff point")
 		#print(" lat " + repr(latitude) + " long " + repr(longitude) + " alt " + repr(altitude))
-		latlongalt = (latitude-37.231442364580396)+(longitude-(-80.42557873976695))+(altitude-529)		#checks for total difference is less than 0.0001
-		if latlongalt < 1.0001:
+		latlongalt = (latitude-37.1973420)+(longitude-(-80.5798929))+(altitude-529)		#checks for total difference is less than 0.0001
+		if (latitude-37.1973420)<0.0001 and (longitude-(-80.5798929))<0.0001 and (altitude-529)<1.5:
 			rospy.wait_for_service("/mavros/mission/push")
 			resp = waypoint_push(waypoints)
 			waypoints = [
