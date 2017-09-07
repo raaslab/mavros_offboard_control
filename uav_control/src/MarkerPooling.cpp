@@ -7,21 +7,45 @@
 #include "uav_control/MarkerPooling.hpp"
 
 MarkerPooling::MarkerPooling() :
-m_verbal_flag(false), m_init_local_pose_check(true), m_waypoint_count(0), m_priv_nh("~")
+m_total_num_robots(0), m_total_num_markers(0), m_priv_nh("~")
 {
-    m_priv_nh.getParam("verbal_flag", m_verbal_flag);
+    m_priv_nh.getParam("total_num_robots", m_total_num_robots);
+    m_priv_nh.getParam("total_num_markers", m_total_num_markers);
 
     // Subscriber
-    m_state_sub = m_nh.subscribe<mavros_msgs::State>
-            ("mavros/state", 10, &MarkerPooling::state_cb, this);
-    m_local_pos_sub = m_nh.subscribe<geometry_msgs::PoseStamped>
-            ("mavros/local_position/pose", 10, &MarkerPooling::cur_pose_cb, this);
-    m_init_local_pos_sub = m_nh.subscribe<geometry_msgs::PoseStamped>
-            ("mavros/local_position/pose", 10, &MarkerPooling::init_pose_cb, this);
+    m_pool_sub = m_nh.subscribe<apriltags::AprilTagDetections>
+            ("apriltags/aprilTagDetections", 10, &MarkerPooling::marker_pooling, this);
 
     // Publisher
-    m_local_pos_pub = m_nh.advertise<geometry_msgs::PoseSta mped>
-            ("mavros/setpoint_position/local", 10);
+    m_marker_pub = m_nh.advertise<uav_control::marker_detection>
+            ("uav_control/marker_detection", 10);
+
+    m_count_id = 0;
+}
+
+void MarkerPooling::marker_pooling(const apriltags::AprilTagDetections::ConstPtr& msg) {
+    for (vector<AprilTagDetection>::iterator it = msg->detections.begin(); it != msg->detections.end(); ++it) {
+        if (m_count_id == it->id) {
+            m_marker_id.push_back(it->id);
+            m_x_pos.push_back(it->pose.position.x);
+            m_y_pos.push_back(it->pose.position.y);
+            m_z_pos.push_back(it->pose.position.z);
+            m_count_id += 1;
+        }
+    }
+
+    if (m_count_id == m_total_num_markers+1) {
+        uav_control::marker_detection pub_msg;
+        pub_msg.total_num = m_total_num_markers;
+        pub_msg.id = m_marker_id;
+        pub_msg.x_pos = m_x_pos;
+        pub_msg.y_pos = m_y_pos;
+        pub_msg.z_pos = m_z_pos;
+
+        m_marker_pub.publish(pub_msg);
+
+        m_count_id = 0;
+    }
 }
 
 int main(int argc, char **argv)

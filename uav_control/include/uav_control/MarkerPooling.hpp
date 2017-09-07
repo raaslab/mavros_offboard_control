@@ -3,8 +3,11 @@
 
 #include <ros/ros.h>
 #include <apriltags/AprilTagDetections.h>
+#include <apriltags/AprilTagDetection.h>
 #include <uav_control/marker_detection.h>
 #include <vector>
+#include <string>
+#include <set>
 
 using namespace std;
 
@@ -14,26 +17,16 @@ private:
 	ros::NodeHandle m_priv_nh;
 
 	// Subscriber
-	ros::Subscriber m_state_sub;
-	ros::Subscriber m_local_pos_sub;
-	ros::Subscriber m_init_local_pos_sub;
+	ros::Subscriber m_pool_sub;
 
 	//Publisher
-	ros::Publisher m_local_pos_pub;
+	ros::Publisher m_marker_pub;
 
-	// ros::ServiceClient m_arming_client;
-	// ros::ServiceClient m_set_mode_client;
+	int m_total_num_robots;
+	int m_total_num_markers;
+	int m_count_id;
 
-	bool m_verbal_flag;
-
-	mavros_msgs::State m_current_state;
-	geometry_msgs::PoseStamped m_current_pose;
-	vector<geometry_msgs::PoseStamped> m_waypoint_pose;
-	bool m_init_local_pose_check;
-	int m_waypoint_count;
-
-	// Waypoint points
-	int m_num_waypoint;
+	vector<int> m_marker_id;
 	vector<double> m_x_pos;
 	vector<double> m_y_pos;
 	vector<double> m_z_pos;
@@ -41,9 +34,7 @@ private:
 public:
 	MarkerPooling();
 
-	void state_cb(const apriltags::AprilTagDetections::ConstPtr& msg);
-	void get_waypoint();
-	void publish_waypoint();
+	void marker_pooling(const apriltags::AprilTagDetections::ConstPtr& msg);
 };
 
 #endif
