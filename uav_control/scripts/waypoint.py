@@ -61,14 +61,14 @@ def main():
 	print(resp)
 	rospy.sleep(5)
 	
-	#Arming
-	print("\n----------ARMING----------")
-	rospy.wait_for_service("/mavros/cmd/arming")
-	print("Arming UAV!!!")
-	uav_arm = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)
-	resp = uav_arm(1)
-	print(resp)
-	rospy.sleep(5)
+#	#Arming
+#	print("\n----------ARMING----------")
+#	rospy.wait_for_service("/mavros/cmd/arming")
+#	print("Arming UAV!!!")
+#	uav_arm = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)
+#	resp = uav_arm(1)
+#	print(resp)
+#	rospy.sleep(5)
 	
 	#Sending waypoints_push
 	print("\n----------PUSHING----------")
@@ -76,9 +76,9 @@ def main():
 	rospy.wait_for_service("/mavros/mission/push")
 	
 	waypoints = [
-		Waypoint(frame = 3, command = 22, is_current = True, autocontinue = True, param1 = 5, x_lat = 47.3975922, y_long = 8.5455939, z_alt = 5),
-		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 47.3979922, y_long = 8.5455939, z_alt = 10),
-		Waypoint(frame = 3, command = 21, is_current = False, autocontinue = True, param1 = 5, x_lat = 47.3989922, y_long = 8.5455939, z_alt = 15)
+		Waypoint(frame = 3, command = 22, is_current = True, autocontinue = True, param1 = 5, x_lat = 37.1977394, y_long = -80.5794510, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1976407, y_long = -80.5795481, z_alt = 5),
+		Waypoint(frame = 3, command = 21, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1975393, y_long = -80.5796954, z_alt = 0)
 	]
 	
 	waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
@@ -97,11 +97,11 @@ def main():
 	
 	while True:						#waits for last_waypoint in previous WaypointList to be visited
 		rospy.sleep(2)
-		print("WAITING11111111111111111111111111111111")
+		print("WAITING for last_waypoint == True")
 		if last_waypoint == True:			#if last_waypoint is in the process of being visited
 			while True:
 				rospy.sleep(2)
-				print("WAITING222222222222222222222222222222222")
+				print("WAITING for last_waypoint == False")
 				if last_waypoint == False:	#if last_waypoint has been visited (due to previous constraint)
 					break
 			break
@@ -126,42 +126,43 @@ def main():
 
 	while True:
 		rospy.sleep(2)
-		print("WAITING3333333333333333333333333333333")
+		print("WAITING for us to be within 1 meter of the next takeoff point")
 		#print(" lat " + repr(latitude) + " long " + repr(longitude) + " alt " + repr(altitude))
-		latlongalt = (latitude-47.39899)+(longitude-8.54559)+(altitude-488)		#checks for total difference is less than 0.0001
-		if latlongalt < 0.0001:
+		latlongalt = (latitude-37.1973420)+(longitude-(-80.5798929))+(altitude-529)		#checks for total difference is less than 0.0001
+		if (latitude-37.1973420)<0.0001 and (longitude-(-80.5798929))<0.0001 and (altitude-529)<1.5:
 			rospy.wait_for_service("/mavros/mission/push")
 			resp = waypoint_push(waypoints)
 			waypoints = [
-				Waypoint(frame = 3, command = 22, is_current = True, autocontinue = True, param1 = 5, x_lat = 47.3975922, y_long = 8.5455939, z_alt = 20),
-				Waypoint(frame = 3, command = 21, is_current = True, autocontinue = True, param1 = 5, x_lat = 47.3975922, y_long = 8.5455939, z_alt = 20),
+				Waypoint(frame = 3, command = 22, is_current = True, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
+				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1972726, y_long = -80.5799733, z_alt = 5),
+				Waypoint(frame = 3, command = 21, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1971499, y_long = -80.5801173, z_alt = 0)
 			]
 			resp = waypoint_push(waypoints)
 			print(resp)
 			rospy.sleep(5)
 			break
-	#Arming
-	print("\n----------ARMING----------")
-	rospy.wait_for_service("/mavros/cmd/arming")
-	print("Arming UAV!!!")
-	uav_arm = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)
-	resp = uav_arm(1)
-	print(resp)
-	rospy.sleep(5)
+#	#Arming
+#	print("\n----------ARMING----------")
+#	rospy.wait_for_service("/mavros/cmd/arming")
+#	print("Arming UAV!!!")
+#	uav_arm = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)
+#	resp = uav_arm(1)
+#	print(resp)
+#	rospy.sleep(5)
 
 	while True:						#waits for last_waypoint in previous WaypointList to be visited
 		rospy.sleep(2)
-		print("WAITING4444444444444444444444444444")
+		print("WAITING for last_waypoint to be true")
 		if last_waypoint == True:			#if last_waypoint is in the process of being visited
 			while True:
 				rospy.sleep(2)
-				print("WAITING555555555555555555555555555555555555555")
+				print("WAITING for last_waypoint to be false")
 				if last_waypoint == False:	#if last_waypoint has been visited (due to previous constraint)
 					break
 			break
 
 	
-	print("fin")
+	print("EVERYTHING WORKED AS PLANNED!!!")
 	rospy.spin()
 
 	
