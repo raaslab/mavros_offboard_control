@@ -76,7 +76,10 @@ while(1)
 %     if countWaypoint == 8
 %         break;
 %     end
-    if countWaypoint == 970
+%     if countWaypoint == 970
+%         break;
+%     end
+    if countWaypoint == 2700
         break;
     end
 end
@@ -90,7 +93,7 @@ hold on;
 %     hold on;
 % end
 
-title('Trajectory of Sansa')
+title('Trajectory of Arya')
 xlabel('x')
 ylabel('y')
 zlabel('z')

@@ -1,0 +1,8 @@
+<launch>
+  <node type="uav_marker_tracking" pkg="uav_control" name="offb_node" output="screen">
+  	<param name="uav_id" type="int" value="1" />
+  	<param name="total_num_robots" type="int" value="2" />
+  	<param name="verbal_flag" type="bool" value="true" />
+    <rosparam file="$(find uav_control)/yaml/tracking_by_motion_primitive.yaml" command="load" />
+  </node>
+</launch>
