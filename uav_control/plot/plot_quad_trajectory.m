@@ -4,8 +4,8 @@ pose = rossubscriber('/mavros/local_position/pose');
 pause(0.5);
 globPose = rossubscriber('/mavros/global_position/local');
 pause(0.5);
-primitive = rossubscriber('/mavros/motion_primitive');
-pause(0.5);
+%primitive = rossubscriber('/mavros/motion_primitive');
+%pause(0.5);
 
 posX = [];
 posY = [];
@@ -21,11 +21,24 @@ waypointZ = [];
 
 countWaypoint = 0;
 
+i = 1
 while(1)
-    countWaypoint = countWaypoint + 1;
+Odommsg = rostopic('echo', '/mavros/local_position/pose');
+OdomX(i)=Odommsg.Pose.Pose.Position.X;
+OdomY(i)=Odommsg.Pose.Pose.Position.Y;
+OdomZ(i)=Odommsg.Pose.Pose.Position.Z;
+end
+    
+    
+    
+    
+while(1)
+    countWaypoint = countWaypoint + 1
     
     msgPose = receive(pose);
+    random = 25
     msgGlobPose = receive(globPose);
+    random = 50
 %     msgPrimitive = receive(primitive);
     
 %     s = sprintf('robot position: (%.2f, %.2f, %.2f)', msgPose.Pose.Position.X, msgPose.Pose.Position.Y, msgPose.Pose.Position.Z);
@@ -79,7 +92,7 @@ while(1)
 %     if countWaypoint == 970
 %         break;
 %     end
-    if countWaypoint == 2700
+    if countWaypoint == 5
         break;
     end
 end
