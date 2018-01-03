@@ -37,12 +37,22 @@ def globalPosition_callback(data):
 	longitude = data.longitude
 	altitude = data.altitude
 
+def waiting_ugv(data):
+	print("\n------------\nWaiting for UGV")
+	while True:
+		
+
+
 
 def main():
 	rospy.init_node('wayPoint')
 	rospy.Subscriber("/mavros/mission/waypoints", WaypointList, waypoint_callback)
 	rospy.Subscriber("/mavros/global_position/raw/fix", NavSatFix, globalPosition_callback)
-
+	#Flag topic
+	readyBit = rospy.Publisher("/mavros/ugv/ready", String, queue_size=10)
+	ready_str = "ready"
+	notReady_str = "notReady"
+    
 	#Clearing waypoints
 	print("\n----------CLEARING----------")
 	rospy.wait_for_service("/mavros/mission/clear")
@@ -78,7 +88,7 @@ def main():
 	waypoints = [
 		Waypoint(frame = 3, command = 22, is_current = True, autocontinue = True, param1 = 5, x_lat = 37.1977394, y_long = -80.5794510, z_alt = 10),
 		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1976407, y_long = -80.5795481, z_alt = 5),
-		Waypoint(frame = 3, command = 21, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1975393, y_long = -80.5796954, z_alt = 0)
+		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1975393, y_long = -80.5796954, z_alt = 5)
 	]
 	
 	waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
@@ -103,6 +113,7 @@ def main():
 				rospy.sleep(2)
 				print("WAITING for last_waypoint == False")
 				if last_waypoint == False:	#if last_waypoint has been visited (due to previous constraint)
+					readyBit.publish(ready_str)
 					break
 			break
 	
@@ -117,12 +128,16 @@ def main():
 	rospy.sleep(5)
 	#Call waypoints_pull
 	print("\n----------PULLING----------")
+	print("\n----------Should be Empty----------")
 	rospy.wait_for_service("/mavros/mission/pull")
 	print("Calling Waypoint_pull Service")
 	waypoint_pull = rospy.ServiceProxy("/mavros/mission/pull", WaypointPull)
 	resp = waypoint_pull()
 	print(resp)
 	rospy.sleep(5)
+
+	waiting_ugv()
+
 
 	while True:
 		rospy.sleep(2)
