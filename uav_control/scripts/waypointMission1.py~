@@ -75,7 +75,7 @@ def main():
 		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.197842, y_long = -80.580127, z_alt = 10),
 		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.197872, y_long = -80.580083, z_alt = 10),
 		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.197696, y_long = -80.580072, z_alt = 10),
-		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.197554, y_long = -80.580061, z_alt = 10)
+		Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.197554, y_long = -80.580061, z_alt = 5)
 	]
 	waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
 	resp = waypoint_push(waypoints)
@@ -133,7 +133,7 @@ def main():
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198126, y_long = -80.579690, z_alt = 10),
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.197993, y_long = -80.579824, z_alt = 10),
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198024, y_long = -80.579842, z_alt = 10),
-				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198065, y_long = -80.579823, z_alt = 10)
+				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198065, y_long = -80.579823, z_alt = 5)
 			]
 			resp = waypoint_push(waypoints)
 			print(resp)
@@ -190,7 +190,7 @@ def main():
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198643, y_long = -80.579668, z_alt = 10),
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198552, y_long = -80.579690, z_alt = 10),
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198438, y_long = -80.579767, z_alt = 10),
-				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198452, y_long = -80.579670, z_alt = 10)
+				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198452, y_long = -80.579670, z_alt = 5)
 			]
 			resp = waypoint_push(waypoints)
 			print(resp)
@@ -247,7 +247,7 @@ def main():
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198640, y_long = -80.578925, z_alt = 10),
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198927, y_long = -80.579145, z_alt = 10),
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198985, y_long = -80.579185, z_alt = 10),
-				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198750, y_long = -80.579412, z_alt = 10)
+				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.198750, y_long = -80.579412, z_alt = 5)
 
 			]
 			resp = waypoint_push(waypoints)
