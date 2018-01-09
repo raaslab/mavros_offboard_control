@@ -38,7 +38,7 @@ def globalPosition_callback(data):
 	altitude = data.altitude
 
 def waiting_ugv(lat, long, alt):
-	print("\n------------\nWaiting for UGV")
+	print("\n----------waiting_ugv----------")
 	while True:
 		# TODO: add listener to the UGV flag here
 		# checker = UGV publisher
@@ -47,38 +47,40 @@ def waiting_ugv(lat, long, alt):
 			waypoints = [Waypoint(frame = 3, command = 21, is_current = True, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)]
 			waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
 			resp = waypoint_push(waypoints)
-			print(resp)
+			#print(resp)
 			rospy.sleep(5)
 			return
 
 def clear_pull():
+	print("\n----------clear_pull----------")
 	#Clearing waypoints
-	print("\n----------CLEARING----------")
+	#print("\n----------CLEARING----------")
 	rospy.wait_for_service("/mavros/mission/clear")
-	print("Clearing Waypoints!!!")
+	#print("Clearing Waypoints!!!")
 	waypoint_clear = rospy.ServiceProxy("/mavros/mission/clear", WaypointClear)
 	resp = waypoint_clear()
-	print(resp)
+	#print(resp)
 	rospy.sleep(5)
 
 	#Call waypoints_pull
-	print("\n----------PULLING----------")
+	#print("\n----------PULLING----------")
 	rospy.wait_for_service("/mavros/mission/pull")
-	print("Calling Waypoint_pull Service")
+	#print("Calling Waypoint_pull Service")
 	waypoint_pull = rospy.ServiceProxy("/mavros/mission/pull", WaypointPull)
 	resp = waypoint_pull()
-	print(resp)
+	#print(resp)
 	rospy.sleep(5)
 	return
 
 def finishwaypoints():
+	print("\n----------finishwaypoints----------")
 	while True:						#waits for last_waypoint in previous WaypointList to be visited
 		rospy.sleep(2)
-		print("WAITING for last_waypoint to be true")
+		#print("WAITING for last_waypoint to be true")
 		if last_waypoint == True:			#if last_waypoint is in the process of being visited
 			while True:
 				rospy.sleep(2)
-				print("WAITING for last_waypoint to be false")
+				#print("WAITING for last_waypoint to be false")
 				if last_waypoint == False:	#if last_waypoint has been visited (due to previous constraint)
 					break
 			break
@@ -98,7 +100,7 @@ def main():
 		
 	#Sending waypoints_push
 	print("\n----------PUSHING----------")
-	print("Waiting for MAVROS service...")
+	#print("Waiting for MAVROS service...")
 	rospy.wait_for_service("/mavros/mission/push")
 	
 	waypoints = [
@@ -109,7 +111,7 @@ def main():
 	
 	waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
 	resp = waypoint_push(waypoints)
-	print(resp)
+	#print(resp)
 	rospy.sleep(5)
 	
 	finishwaypoints() #checks if waypoints are finished
@@ -120,7 +122,7 @@ def main():
 
 	while True:
 		rospy.sleep(2)
-		print("WAITING for us to be within 1 meter of the next takeoff point")
+		#print("WAITING for us to be within 1 meter of the next takeoff point")
 		#print(" lat " + repr(latitude) + " long " + repr(longitude) + " alt " + repr(altitude))
 		if (latitude-37.1973420)<0.0001 and (longitude-(-80.5798929))<0.0001 and (altitude-529)<2:
 			rospy.wait_for_service("/mavros/mission/push")
@@ -131,7 +133,7 @@ def main():
 				Waypoint(frame = 3, command = 16, is_current = False, autocontinue = True, param1 = 5, x_lat = 37.1971499, y_long = -80.5801173, z_alt = 5)
 			]
 			resp = waypoint_push(waypoints)
-			print(resp)
+			#print(resp)
 			rospy.sleep(5)
 			break
 
