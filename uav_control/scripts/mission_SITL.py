@@ -15,10 +15,17 @@ longitude = 0.0
 altitude = 0.0
 last_waypoint = False
 
+def waiter(condition):
+	while True:
+		if condition:
+			return
+		else:
+			rospy.sleep(2)
+
 def waypoint_callback(data):
-	print("\n----------waypoint_callback----------")
+	# print("\n----------waypoint_callback----------")
 	global last_waypoint
-	rospy.loginfo("Got waypoint: %s", data)
+	# rospy.loginfo("Got waypoint: %s", data)
 	if len(data.waypoints) != 0:							# If waypoint list is not empty
 		rospy.loginfo("is_current: %s", data.waypoints[len(data.waypoints)-1].is_current)
 		last_waypoint = data.waypoints[len(data.waypoints)-1].is_current	# Checks status of "is_current" for last waypoint
@@ -41,7 +48,7 @@ def waiting_ugv(lat, long, alt):
 		if checker == 1:
 			waypoints = [Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)]			
 			waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
-			resp = waypoint_push(0,waypoints)
+			resp = waypoint_push(waypoints)
 			rospy.sleep(5)			
 			return
 
@@ -68,7 +75,7 @@ def finishWaypoints():
 			while True:
 				rospy.sleep(2)
 				# Waiting for last_waypoint to be false
-				if last_waypoint == False:	# If last_waypoint has been visited (due to previous constraint)
+				if last_waypoint == True:	# If last_waypoint has been visited (due to previous constraint)
 					break
 			break
 	return
@@ -91,9 +98,18 @@ def pushingWaypoints(poi):
 def takeoff_call(lat, long, alt):
 	print("\n----------takeoff_call----------")
 	takeoff = rospy.ServiceProxy("/mavros/cmd/takeoff", CommandTOL)
-	res = takeoff(0,0,lat,long, alt)
-	rospy.sleep(15)
+	resp = takeoff(0,0,lat,long, alt)
+	rospy.sleep(5)
 	return
+
+def switch_modes(current_mode, next_mode): # current_mode: int, next_mode: str (http://docs.ros.org/jade/api/mavros_msgs/html/srv/SetMode.html)
+	print("\n----------switch_modes----------")
+	rospy.wait_for_service("/mavros/set_mode")
+	modes = rospy.ServiceProxy("/mavros/set_mode", SetMode)
+	resp = modes(current_mode, next_mode)
+	rospy.sleep(5)
+	return
+
 
 
 def main():
@@ -106,26 +122,30 @@ def main():
 	
 	armingCall()	
 
-	# TODO: Check if this works
+	# switch_modes(208, "guided")
+
 	# Take off command through service call
-	takeoff_call(37.1977394, -80.5794510, 10)
+	takeoff_call(-35.363238, 149.164230, 10)
 	
 	# Sending waypoints_push
 	waypoints = [
-		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.1977394, y_long = -80.5794510, z_alt = 10),
-		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1976407, y_long = -80.5795481, z_alt = 5),
-		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1975393, y_long = -80.5796954, z_alt = 5)
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = -35.362711, y_long = 149.165882, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = -35.362711, y_long = 149.165882, z_alt = 15),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = -35.361931, y_long = 149.166102, z_alt = 20),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = -35.363676, y_long = 149.166392, z_alt = 15)
 	]
 
 	# print(waypoints)
 	pushingWaypoints(waypoints) # Pushes waypoints to UAV
 
+	switch_modes(216, "auto")
+
 	# TEST3
-	# finishWaypoints() # Checks if waypoints are finished
+	finishWaypoints() # Checks if waypoints are finished
 	# clear_pull() # Logistic house keeping
 
 	# TEST4
-	# waiting_ugv(37.1975393, -80.5796954, 0) # Checks if ugv is at lat long
+	waiting_ugv(-35.363676, 149.166392, 0) # Checks if ugv is at lat long
 	
 	# TEST5
 	# while True:
