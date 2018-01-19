@@ -39,9 +39,12 @@ def waiting_ugv(lat, long, alt):
 		# checker = UGV publisher
 		checker = 1
 		if checker == 1:
-			waypoints = [Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)]			
+			waypoints = [
+			Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt),
+			Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)
+			]
 			waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
-			resp = waypoint_push(0,waypoints)
+			resp = waypoint_push(0, waypoints)
 			rospy.sleep(5)			
 			return
 
@@ -59,7 +62,7 @@ def clear_pull():
 	rospy.sleep(5)
 	return
 
-def finishWaypoints():
+def finishWaypoints(lat, long):
 	print("\n----------finishwaypoints----------")
 	while True:						# Waits for last_waypoint in previous WaypointList to be visited
 		rospy.sleep(2)
@@ -68,7 +71,8 @@ def finishWaypoints():
 			while True:
 				rospy.sleep(2)
 				# Waiting for last_waypoint to be false
-				if last_waypoint == False:	# If last_waypoint has been visited (due to previous constraint)
+				if abs(latitude-(lat))<0.0001 and abs(longitude-(long))<0.0001:
+				# if last_waypoint == False:	# If last_waypoint has been visited (due to previous constraint)
 					break
 			break
 	return
@@ -84,17 +88,24 @@ def pushingWaypoints(poi):
 	print("\n----------pushingWaypoints----------")
 	rospy.wait_for_service("/mavros/mission/push")
 	waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
-	resp = waypoint_push(poi)
+	resp = waypoint_push(0,poi)
 	rospy.sleep(5)
 	return
 
 def takeoff_call(lat, long, alt):
 	print("\n----------takeoff_call----------")
 	takeoff = rospy.ServiceProxy("/mavros/cmd/takeoff", CommandTOL)
-	res = takeoff(0,0,lat,long, alt)
-	rospy.sleep(15)
+	resp = takeoff(0,0,lat,long, alt)
+	rospy.sleep(5)
 	return
 
+def switch_modes(current_mode, next_mode): # current_mode: int, next_mode: str (http://docs.ros.org/jade/api/mavros_msgs/html/srv/SetMode.html)
+	print("\n----------switch_modes----------")
+	rospy.wait_for_service("/mavros/set_mode")
+	modes = rospy.ServiceProxy("/mavros/set_mode", SetMode)
+	resp = modes(current_mode, next_mode)
+	rospy.sleep(5)
+	return
 
 def main():
 	rospy.init_node('wayPoint')
@@ -106,6 +117,8 @@ def main():
 	
 	armingCall()	
 
+	# switch_modes(216, "althold")	
+	
 	# TODO: Check if this works
 	# Take off command through service call
 	takeoff_call(37.1977394, -80.5794510, 10)
@@ -113,42 +126,45 @@ def main():
 	# Sending waypoints_push
 	waypoints = [
 		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.1977394, y_long = -80.5794510, z_alt = 10),
-		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1976407, y_long = -80.5795481, z_alt = 5),
-		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1975393, y_long = -80.5796954, z_alt = 5)
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1977394, y_long = -80.5794510, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1976407, y_long = -80.5795481, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1975393, y_long = -80.5796954, z_alt = 10)
 	]
 
 	# print(waypoints)
 	pushingWaypoints(waypoints) # Pushes waypoints to UAV
 
+	# switch_modes(216, "auto")
+
 	# TEST3
-	# finishWaypoints() # Checks if waypoints are finished
-	# clear_pull() # Logistic house keeping
+	finishWaypoints(37.1975393, -80.5796954) # Checks if waypoints are finished
+	clear_pull() # Logistic house keeping
 
 	# TEST4
-	# waiting_ugv(37.1975393, -80.5796954, 0) # Checks if ugv is at lat long
+	waiting_ugv(37.1975393, -80.5796954, 0) # Checks if ugv is at lat long
 	
 	# TEST5
-	# while True:
-	# 	rospy.sleep(2)
-	# 	print("Waiting for UAV to be close to next takeoff point")
-	# 	if (latitude-37.1973420)<0.0001 and (longitude-(-80.5798929))<0.0001 and (altitude-529)<2:
-	# 		# TODO: Check if this works
-	# 		# Take off command through service call
-	# 		takeoff = rospy.ServiceProxy("/mavros/cmd/takeoff", CommandTOL)
-	# 		res = takeoff(0, 0, 37.1973420, -80.5798929, 10)
+	while True:
+		rospy.sleep(2)
+		print("Waiting for UAV to be close to next takeoff point")
+		if abs(latitude-37.1973420)<0.0001 and abs(longitude-(-80.5798929))<0.0001:
+			# TODO: Check if this works
+			# Take off command through service call
+			takeoff_call(37.1973420, -80.5798929, 10)
 
-	# 		waypoints = [
-	# 			Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
-	# 			Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1972726, y_long = -80.5799733, z_alt = 5),
-	# 			Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1971499, y_long = -80.5801173, z_alt = 5)
-	# 		]
-	# 		pushingWaypoints(waypoints)
-	# 		break
+			waypoints = [
+				Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
+				Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
+				Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1972726, y_long = -80.5799733, z_alt = 10),
+				Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1971499, y_long = -80.5801173, z_alt = 10)
+			]
+			pushingWaypoints(waypoints)
+			break
 
 	# TEST6
-	# finishWaypoints() # Checks if waypoints are finished
-	# clear_pull() # Logistic house keeping
-	# waiting_ugv(37.1971499, -80.5801173, 0) # Checks if ugv is there yet
+	finishWaypoints(37.1971499, -80.5801173) # Checks if waypoints are finished
+	clear_pull() # Logistic house keeping
+	waiting_ugv(37.1971499, -80.5801173, 0) # Checks if ugv is there yet
 	
 	# DONE
 	print("EVERYTHING WORKED AS PLANNED!!!")
