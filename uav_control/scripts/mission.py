@@ -154,7 +154,6 @@ def main():
 			switch_modes(216, "auto", 5)
 			break
 
-	# TEST6
 	finishWaypoints(37.1971499, -80.5801173) # Checks if waypoints are finished
 	clear_pull() # Logistic house keeping
 	waiting_ugv(37.1971499, -80.5801173, 0) # Checks if ugv is there yet
