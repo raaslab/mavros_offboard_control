@@ -14,6 +14,7 @@ latitude = 0.0
 longitude = 0.0
 altitude = 0.0
 last_waypoint = False
+tolerance = 0.00005
 
 def waypoint_callback(data):
 	print("\n----------waypoint_callback----------")
@@ -71,7 +72,7 @@ def finishWaypoints(lat, long):
 			while True:
 				rospy.sleep(2)
 				# Waiting for last_waypoint to be false
-				if abs(latitude-(lat))<0.0001 and abs(longitude-(long))<0.0001:
+				if abs(latitude-(lat))<tolerance and abs(longitude-(long))<tolerance:
 				# if last_waypoint == False:	# If last_waypoint has been visited (due to previous constraint)
 					break
 			break
@@ -138,7 +139,7 @@ def main():
 	while True:
 		rospy.sleep(2)
 		print("Waiting for UAV to be close to next takeoff point")
-		if abs(latitude-37.1973420)<0.0001 and abs(longitude-(-80.5798929))<0.0001:
+		if abs(latitude-37.1973420)<tolerance and abs(longitude-(-80.5798929))<tolerance:
 			swtich_modes(0, "stabalize", 5)
 			armingCall()
 			switch_modes(216, "guided", 5)
