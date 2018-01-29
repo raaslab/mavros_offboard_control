@@ -15,6 +15,7 @@ longitude = 0.0
 altitude = 0.0
 last_waypoint = False
 tolerance = 0.00005
+ugv_ready = "0"
 
 def waypoint_callback(data):
 	print("\n----------waypoint_callback----------")
@@ -33,20 +34,25 @@ def globalPosition_callback(data):
 	longitude = data.longitude
 	altitude = data.altitude
 
+def ready_callback(data):
+	# rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+	global ugv_ready
+	ugv_ready = data.data
+
 def waiting_ugv(lat, long, alt):
 	print("\n----------waiting_ugv----------")
 	while True:
 		# TODO: add listener to the UGV flag here
 		# checker = UGV publisher
-		checker = 1
-		if checker == 1:
+		# checker = 1
+		if ugv_ready == "1":
 			waypoints = [
 			Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt),
 			Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)
 			]
 			waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
 			resp = waypoint_push(0, waypoints)
-			rospy.sleep(5)			
+			rospy.sleep(5)
 			return
 
 def clear_pull():
@@ -63,7 +69,7 @@ def clear_pull():
 	rospy.sleep(5)
 	return
 
-def finishWaypoints(lat, long):
+def finishWaypoints(lat, long, pub):
 	print("\n----------finishwaypoints----------")
 	while True:						# Waits for last_waypoint in previous WaypointList to be visited
 		rospy.sleep(2)
@@ -74,6 +80,7 @@ def finishWaypoints(lat, long):
 				# Waiting for last_waypoint to be false
 				if abs(latitude-(lat))<tolerance and abs(longitude-(long))<tolerance:
 				# if last_waypoint == False:	# If last_waypoint has been visited (due to previous constraint)
+					pub.publish("1")
 					break
 			break
 	return
@@ -112,8 +119,10 @@ def main():
 	rospy.init_node('wayPoint')
 	rospy.Subscriber("/mavros/mission/waypoints", WaypointList, waypoint_callback)
 	rospy.Subscriber("/mavros/global_position/raw/fix", NavSatFix, globalPosition_callback)
-	readyBit = rospy.Publisher("/mavros/ugv/ready", String, queue_size=10) # Flag topic
+	readyBit = rospy.Publisher("/mavros/uav/ready", String, queue_size=10) # Flag topic
+	rospy.Subscriber("/mavros/ugv/ready", String, ready_callback)
     
+    readyBit.publish("0")
 	clear_pull()
 	armingCall()
 	switch_modes(0, "guided", 5)
@@ -128,7 +137,7 @@ def main():
 	pushingWaypoints(waypoints) # Pushes waypoints to UAV
 
 	switch_modes(0, "auto", 5)
-	finishWaypoints(37.1975393, -80.5796954)	# Checks if waypoints are finished
+	finishWaypoints(37.1975393, -80.5796954, readyBit)	# Checks if waypoints are finished
 	clear_pull() # Logistic house keeping
 	waiting_ugv(37.1975393, -80.5796954, 0)	# Checks if ugv is at lat long
 	switch_modes(0, "guided", 1)
@@ -140,6 +149,7 @@ def main():
 		rospy.sleep(2)
 		print("Waiting for UAV to be close to next takeoff point")
 		if abs(latitude-37.1973420)<tolerance and abs(longitude-(-80.5798929))<tolerance:
+			readyBit.publish("0")
 			switch_modes(0, "stabilize", 5)
 			armingCall()
 			switch_modes(216, "guided", 5)
@@ -155,7 +165,7 @@ def main():
 			switch_modes(216, "auto", 5)
 			break
 
-	finishWaypoints(37.1971499, -80.5801173) # Checks if waypoints are finished
+	finishWaypoints(37.1971499, -80.5801173, readyBit) # Checks if waypoints are finished
 	clear_pull() # Logistic house keeping
 	waiting_ugv(37.1971499, -80.5801173, 0) # Checks if ugv is there yet
 	switch_modes(0, "guided", 1)
