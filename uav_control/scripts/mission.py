@@ -131,8 +131,8 @@ def main():
 	finishWaypoints(37.1975393, -80.5796954)	# Checks if waypoints are finished
 	clear_pull() # Logistic house keeping
 	waiting_ugv(37.1975393, -80.5796954, 0)	# Checks if ugv is at lat long
-	swtich_modes(0, "guided", 1)
-	swtich_modes(0, "auto", 5)
+	switch_modes(0, "guided", 1)
+	switch_modes(0, "auto", 5)
 
 
 	# TEST5
@@ -140,7 +140,7 @@ def main():
 		rospy.sleep(2)
 		print("Waiting for UAV to be close to next takeoff point")
 		if abs(latitude-37.1973420)<tolerance and abs(longitude-(-80.5798929))<tolerance:
-			swtich_modes(0, "stabalize", 5)
+			switch_modes(0, "stabilize", 5)
 			armingCall()
 			switch_modes(216, "guided", 5)
 			takeoff_call(37.1973420, -80.5798929, 10)
@@ -158,8 +158,8 @@ def main():
 	finishWaypoints(37.1971499, -80.5801173) # Checks if waypoints are finished
 	clear_pull() # Logistic house keeping
 	waiting_ugv(37.1971499, -80.5801173, 0) # Checks if ugv is there yet
-	swtich_modes(0, "guided", 1)
-	swtich_modes(0, "auto", 5)
+	switch_modes(0, "guided", 1)
+	switch_modes(0, "auto", 5)
 	
 	# DONE
 	print("EVERYTHING WORKED AS PLANNED!!!")
