@@ -7,6 +7,7 @@ import yaml
 from mavros_msgs.msg import *
 from mavros_msgs.srv import *
 from std_msgs.msg import String
+from std_msgs.msg import Int64
 from sensor_msgs.msg import NavSatFix
 
 #global variables
@@ -45,7 +46,7 @@ def waiting_ugv(lat, long, alt):
 		# TODO: add listener to the UGV flag here
 		# checker = UGV publisher
 		# checker = 1
-		if ugv_ready == "1":
+		if ugv_ready == 1:
 			waypoints = [
 			Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt),
 			Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)
@@ -80,7 +81,7 @@ def finishWaypoints(lat, long, pub):
 				# Waiting for last_waypoint to be false
 				if abs(latitude-(lat))<tolerance and abs(longitude-(long))<tolerance:
 				# if last_waypoint == False:	# If last_waypoint has been visited (due to previous constraint)
-					pub.publish("1")
+					pub.publish(1)
 					break
 			break
 	return
@@ -116,13 +117,13 @@ def switch_modes(current_mode, next_mode, delay): # current_mode: int, next_mode
 	return
 
 def main():
-	rospy.init_node('wayPoint')
+	rospy.init_node('uav_node')
 	rospy.Subscriber("/mavros/mission/waypoints", WaypointList, waypoint_callback)
 	rospy.Subscriber("/mavros/global_position/raw/fix", NavSatFix, globalPosition_callback)
-	readyBit = rospy.Publisher("/mavros/uav/ready", String, queue_size=10) # Flag topic
-	rospy.Subscriber("/mavros/ugv/ready", String, ready_callback)
-    
-    readyBit.publish("0")
+	readyBit = rospy.Publisher("/mavros/uav/ready", Int64, queue_size=10) # Flag topic
+	rospy.Subscriber("/mavros/ugv/ready", Int64, ready_callback)
+    	
+	readyBit.publish(0)
 	clear_pull()
 	armingCall()
 	switch_modes(0, "guided", 5)
@@ -149,7 +150,7 @@ def main():
 		rospy.sleep(2)
 		print("Waiting for UAV to be close to next takeoff point")
 		if abs(latitude-37.1973420)<tolerance and abs(longitude-(-80.5798929))<tolerance:
-			readyBit.publish("0")
+			readyBit.publish(0)
 			switch_modes(0, "stabilize", 5)
 			armingCall()
 			switch_modes(216, "guided", 5)
