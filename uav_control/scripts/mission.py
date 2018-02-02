@@ -116,18 +116,28 @@ def switch_modes(current_mode, next_mode, delay): # current_mode: int, next_mode
 	rospy.sleep(delay)
 	return
 
+def takeoff_waypoint_land(waypoints, takeoff_point, land_point, readyBit):
+	switch_modes(0, "stabilize", 5)
+	armingCall()
+	switch_modes(0, "guided", 5)
+	takeoff_call(takeoff_point[0], takeoff_point[1], 10)
+	pushingWaypoints(waypoints) # Pushes waypoints to UAV
+	switch_modes(0, "auto", 5)
+	finishWaypoints(land_point[0], land_point[1], readyBit)	# Checks if waypoints are finished
+	clear_pull() # Logistic house keeping
+	waiting_ugv(land_point[0], land_point[1], 0)	# Checks if ugv is at lat long
+	switch_modes(0, "guided", 1)
+	switch_modes(0, "auto", 5)
+	return
+
 def main():
 	rospy.init_node('uav_node')
 	rospy.Subscriber("/mavros/mission/waypoints", WaypointList, waypoint_callback)
 	rospy.Subscriber("/mavros/global_position/raw/fix", NavSatFix, globalPosition_callback)
 	readyBit = rospy.Publisher("/mavros/uav/ready", Int64, queue_size=10) # Flag topic
-	rospy.Subscriber("/mavros/ugv/ready", Int64, ready_callback)
-    	
+	rospy.Subscriber("/mavros/ugv/ready", Int64, ready_callback)	
 	readyBit.publish(0)
 	clear_pull()
-	armingCall()
-	switch_modes(0, "guided", 5)
-	takeoff_call(37.1977394, -80.5794510, 10)
 
 	waypoints = [	# Sending waypoints_push
 		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.1977394, y_long = -80.5794510, z_alt = 10),
@@ -135,43 +145,37 @@ def main():
 		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1976407, y_long = -80.5795481, z_alt = 10),
 		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1975393, y_long = -80.5796954, z_alt = 10)
 	]
-	pushingWaypoints(waypoints) # Pushes waypoints to UAV
+	takeoff = [37.1977394,-80.5794510]
+	land = [37.1975393,-80.5796954]
+	takeoff_waypoint_land(waypoints, takeoff, land, readyBit)
 
-	switch_modes(0, "auto", 5)
-	finishWaypoints(37.1975393, -80.5796954, readyBit)	# Checks if waypoints are finished
-	clear_pull() # Logistic house keeping
-	waiting_ugv(37.1975393, -80.5796954, 0)	# Checks if ugv is at lat long
-	switch_modes(0, "guided", 1)
-	switch_modes(0, "auto", 5)
-
-
-	# TEST5
+	waypoints = [
+		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1972726, y_long = -80.5799733, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1971499, y_long = -80.5801173, z_alt = 10)
+	]
+	takeoff = [37.1973420,-80.5798929]
+	land = [37.1971499,-80.5801173]
 	while True:
 		rospy.sleep(2)
 		print("Waiting for UAV to be close to next takeoff point")
 		if abs(latitude-37.1973420)<tolerance and abs(longitude-(-80.5798929))<tolerance:
 			readyBit.publish(0)
-			switch_modes(0, "stabilize", 5)
-			armingCall()
-			switch_modes(216, "guided", 5)
-			takeoff_call(37.1973420, -80.5798929, 10)
-
-			waypoints = [
-				Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
-				Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1973420, y_long = -80.5798929, z_alt = 10),
-				Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1972726, y_long = -80.5799733, z_alt = 10),
-				Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.1971499, y_long = -80.5801173, z_alt = 10)
-			]
-			pushingWaypoints(waypoints)
-			switch_modes(216, "auto", 5)
+			takeoff_waypoint_land(waypoints, takeoff, land)
+			# switch_modes(0, "stabilize", 5)
+			# armingCall()
+			# switch_modes(216, "guided", 5)
+			# takeoff_call(37.1973420, -80.5798929, 10)
+			# pushingWaypoints(waypoints)
+			# switch_modes(216, "auto", 5)
+			# finishWaypoints(37.1971499, -80.5801173, readyBit) # Checks if waypoints are finished
+			# clear_pull() # Logistic house keeping
+			# waiting_ugv(37.1971499, -80.5801173, 0) # Checks if ugv is there yet
+			# switch_modes(0, "guided", 1)
+			# switch_modes(0, "auto", 5)
 			break
 
-	finishWaypoints(37.1971499, -80.5801173, readyBit) # Checks if waypoints are finished
-	clear_pull() # Logistic house keeping
-	waiting_ugv(37.1971499, -80.5801173, 0) # Checks if ugv is there yet
-	switch_modes(0, "guided", 1)
-	switch_modes(0, "auto", 5)
-	
 	# DONE
 	print("EVERYTHING WORKED AS PLANNED!!!")
 	rospy.spin()
