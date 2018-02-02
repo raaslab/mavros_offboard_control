@@ -160,7 +160,7 @@ def main():
 	while True:
 		rospy.sleep(2)
 		print("Waiting for UAV to be close to next takeoff point")
-		if abs(latitude-37.1973420)<tolerance and abs(longitude-(-80.5798929))<tolerance:
+		if abs(latitude-takeoff[0])<tolerance and abs(longitude-(takeoff[1]))<tolerance:
 			readyBit.publish(0)
 			takeoff_waypoint_land(waypoints, takeoff, land)
 			break
