@@ -163,17 +163,6 @@ def main():
 		if abs(latitude-37.1973420)<tolerance and abs(longitude-(-80.5798929))<tolerance:
 			readyBit.publish(0)
 			takeoff_waypoint_land(waypoints, takeoff, land)
-			# switch_modes(0, "stabilize", 5)
-			# armingCall()
-			# switch_modes(216, "guided", 5)
-			# takeoff_call(37.1973420, -80.5798929, 10)
-			# pushingWaypoints(waypoints)
-			# switch_modes(216, "auto", 5)
-			# finishWaypoints(37.1971499, -80.5801173, readyBit) # Checks if waypoints are finished
-			# clear_pull() # Logistic house keeping
-			# waiting_ugv(37.1971499, -80.5801173, 0) # Checks if ugv is there yet
-			# switch_modes(0, "guided", 1)
-			# switch_modes(0, "auto", 5)
 			break
 
 	# DONE
