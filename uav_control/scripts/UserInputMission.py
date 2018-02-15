@@ -43,10 +43,8 @@ def ready_callback(data):
 def waiting_ugv(lat, long, alt):
 	print("\n----------waiting_ugv----------")
 	while True:
-		# TODO: add listener to the UGV flag here
-		# checker = UGV publisher
-		if checker == 1:
-		# if ugv_ready == 1:
+		# if checker == 1:
+		if ugv_ready == 1:
 			waypoints = [
 			Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt),
 			Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)
@@ -134,27 +132,29 @@ def main():
 	rospy.init_node('uav_node')
 	rospy.Subscriber("/mavros/mission/waypoints", WaypointList, waypoint_callback)
 	rospy.Subscriber("/mavros/global_position/raw/fix", NavSatFix, globalPosition_callback)
-	readyBit = rospy.Publisher("/mavros/uav/ready", Int64, queue_size=10) # Flag topic
 	rospy.Subscriber("/mavros/ugv/ready", Int64, ready_callback)	
+	readyBit = rospy.Publisher("/mavros/uav/ready", Int64, queue_size=10) # Flag topic
 	readyBit.publish(0)
 	clear_pull()
 	
-	# waypoints = [	# Sending waypoints_push
-	# 	Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.196749, y_long = -80.580270, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.196749, y_long = -80.580270, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.196828, y_long = -80.580235, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197043, y_long = -80.580264, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197191, y_long = -80.580355, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197376, y_long = -80.580608, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197532, y_long = -80.580561, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197623, y_long = -80.580627, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197730, y_long = -80.580546, z_alt = 10)
-	# ]
-	# takeoff = [37.196749,-80.580270]
-	# land = [37.197730,-80.580546]
-	# takeoff_waypoint_land(waypoints, takeoff, land, readyBit)
+	print("Which set of waypoints?")
+	waypoint_section = input()
 
-	waypoints = [
+	waypoints1 = [	# Sending waypoints_push
+		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.196749, y_long = -80.580270, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.196749, y_long = -80.580270, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.196828, y_long = -80.580235, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197043, y_long = -80.580264, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197191, y_long = -80.580355, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197376, y_long = -80.580608, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197532, y_long = -80.580561, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197623, y_long = -80.580627, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197730, y_long = -80.580546, z_alt = 10)
+	]
+	takeoff1 = [37.196749,-80.580270]
+	land1 = [37.197730,-80.580546]
+
+	waypoints2 = [
 		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.197779, y_long = -80.580670, z_alt = 10),
 		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197779, y_long = -80.580670, z_alt = 10),
 		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197934, y_long = -80.580482, z_alt = 10),
@@ -173,70 +173,84 @@ def main():
 		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197791, y_long = -80.579995, z_alt = 10),
 		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197885, y_long = -80.579991, z_alt = 10)
 	]
-	takeoff = [37.197779,-80.580670]
-	land = [37.197885,-80.579991]
-	while True:
-		rospy.sleep(2)
-		print("Waiting for UAV to be close to next takeoff point")
-		if abs(latitude-takeoff[0])<tolerance and abs(longitude-takeoff[1])<tolerance:
-			readyBit.publish(0)
-			takeoff_waypoint_land(waypoints, takeoff, land)
-			break
+	takeoff2 = [37.197779,-80.580670]
+	land2 = [37.197885,-80.579991]
 
-	# waypoints = [
-	# 	Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.197961, y_long = -80.579831, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197961, y_long = -80.579831, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198007, y_long = -80.579748, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198175, y_long = -80.579745, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198114, y_long = -80.580038, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198142, y_long = -80.580144, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198227, y_long = -80.580195, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198308, y_long = -80.580148, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198386, y_long = -80.580173, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198598, y_long = -80.579973, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198703, y_long = -80.579827, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198409, y_long = -80.579726, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198327, y_long = -80.579470, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198286, y_long = -80.579300, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198151, y_long = -80.579481, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198013, y_long = -80.579360, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198018, y_long = -80.579034, z_alt = 10)
-	# ]
-	# takeoff = [37.197961,-80.579831]
-	# land = [37.198018,-80.579034]
-	# while True:
-	# 	rospy.sleep(2)
-	# 	print("Waiting for UAV to be close to next takeoff point")
-	# 	if abs(latitude-takeoff[0])<tolerance and abs(longitude-takeoff[1])<tolerance:
-	# 		readyBit.publish(0)
-	# 		takeoff_waypoint_land(waypoints, takeoff, land)
-	# 		break
+	waypoints3 = [
+		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.197961, y_long = -80.579831, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.197961, y_long = -80.579831, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198007, y_long = -80.579748, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198175, y_long = -80.579745, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198114, y_long = -80.580038, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198142, y_long = -80.580144, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198227, y_long = -80.580195, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198308, y_long = -80.580148, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198386, y_long = -80.580173, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198598, y_long = -80.579973, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198703, y_long = -80.579827, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198409, y_long = -80.579726, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198327, y_long = -80.579470, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198286, y_long = -80.579300, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198151, y_long = -80.579481, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198013, y_long = -80.579360, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198018, y_long = -80.579034, z_alt = 10)
+	]
+	takeoff3 = [37.197961,-80.579831]
+	land3 = [37.198018,-80.579034]
 
-	# waypoints = [
-	# 	Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.198388, y_long = -80.578879, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198388, y_long = -80.578879, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198584, y_long = -80.578570, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198542, y_long = -80.579220, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198779, y_long = -80.579046, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198985, y_long = -80.579420, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199013, y_long = -80.579061, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199096, y_long = -80.579034, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199096, y_long = -80.578936, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199006, y_long = -80.578767, z_alt = 10),
-	# 	Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199111, y_long = -80.578874, z_alt = 10)
-	# ]
-	# takeoff = [37.198388,-80.578879]
-	# land = [37.199111,-80.578874]
-	# while True:
-	# 	rospy.sleep(2)
-	# 	print("Waiting for UAV to be close to next takeoff point")
-	# 	if abs(latitude-takeoff[0])<tolerance and abs(longitude-takeoff[1])<tolerance:
-	# 		readyBit.publish(0)
-	# 		takeoff_waypoint_land(waypoints, takeoff, land)
-	# 		break
+	waypoints4 = [
+		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.198388, y_long = -80.578879, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198388, y_long = -80.578879, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198584, y_long = -80.578570, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198542, y_long = -80.579220, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198779, y_long = -80.579046, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.198985, y_long = -80.579420, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199013, y_long = -80.579061, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199096, y_long = -80.579034, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199096, y_long = -80.578936, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199006, y_long = -80.578767, z_alt = 10),
+		Waypoint(frame = 3, command = 16, is_current = 0, autocontinue = True, param1 = 5, x_lat = 37.199111, y_long = -80.578874, z_alt = 10)
+	]
+	takeoff4 = [37.198388,-80.578879]
+	land4 = [37.199111,-80.578874]
+
+	if waypoint_section == 1:
+		while True:
+			rospy.sleep(2)
+			print("Waiting for UAV to be close to next takeoff point")
+			if abs(latitude-takeoff1[0])<tolerance and abs(longitude-takeoff1[1])<tolerance:
+				readyBit.publish(0)
+				takeoff_waypoint_land(waypoints1, takeoff1, land1, readyBit)
+				break
+	elif waypoint_section == 2:
+		while True:
+			rospy.sleep(2)
+			print("Waiting for UAV to be close to next takeoff point")
+			if abs(latitude-takeoff2[0])<tolerance and abs(longitude-takeoff2[1])<tolerance:
+				readyBit.publish(0)
+				takeoff_waypoint_land(waypoints2, takeoff2, land2, readyBit)
+				break
+	elif waypoint_section == 3:
+		while True:
+			rospy.sleep(2)
+			print("Waiting for UAV to be close to next takeoff point")
+			if abs(latitude-takeoff3[0])<tolerance and abs(longitude-takeoff3[1])<tolerance:
+				readyBit.publish(0)
+				takeoff_waypoint_land(waypoints3, takeoff3, land3, readyBit)
+				break
+	elif waypoint_section == 4:
+		while True:
+			rospy.sleep(2)
+			print("Waiting for UAV to be close to next takeoff point")
+			if abs(latitude-takeoff4[0])<tolerance and abs(longitude-takeoff4[1])<tolerance:
+				readyBit.publish(0)
+				takeoff_waypoint_land(waypoints4, takeoff4, land4, readyBit)
+				break
+	else:
+		print("You inputed a wrong number. Try again.")
 
 	# DONE
-	print("Second Part")
+	print("Finished")
 	rospy.spin()
 
 
