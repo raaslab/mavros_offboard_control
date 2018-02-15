@@ -135,10 +135,10 @@ def main():
 	rospy.Subscriber("/mavros/ugv/ready", Int64, ready_callback)	
 	readyBit = rospy.Publisher("/mavros/uav/ready", Int64, queue_size=10) # Flag topic
 	readyBit.publish(0)
-	clear_pull()
+	# clear_pull()
 	
 	print("Which set of waypoints?")
-	waypoint_section = input()
+	waypoint_section = int(input())
 
 	waypoints1 = [	# Sending waypoints_push
 		Waypoint(frame = 3, command = 16, is_current = 1, autocontinue = True, param1 = 5, x_lat = 37.196749, y_long = -80.580270, z_alt = 10),
