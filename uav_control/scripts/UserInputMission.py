@@ -43,15 +43,15 @@ def ready_callback(data):
 def waiting_ugv(lat, long, alt):
 	print("\n----------waiting_ugv----------")
 	while True:
-		checker = 1
-		if checker == 1:
+		# checker = 1
+		if True:
 		# if ugv_ready == 1:
 			waypoints = [
-			Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt),
-			Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)
+			Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt),
+			Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)
 			]
 			waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
-			resp = waypoint_push(0, waypoints)
+			resp = waypoint_push(0,waypoints)
 			rospy.sleep(5)			
 			return
 
@@ -128,11 +128,11 @@ def takeoff_waypoint_land(waypoints, takeoff_point, land_point, readyBit, last_p
 		waiting_ugv(land_point[0], land_point[1], 0)	# Checks if ugv is at lat long
 	else:
 		waypoints = [
-		Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = land_point[0], y_long = land_point[1], z_alt = 0),
-		Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = land_point[0], y_long = land_point[1], z_alt = 0)
+		Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = land_point[0], y_long = land_point[1], z_alt = 0),
+		Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = land_point[0], y_long = land_point[1], z_alt = 0)
 		]
 		waypoint_push = rospy.ServiceProxy("/mavros/mission/push", WaypointPush)
-		resp = waypoint_push(0, waypoints)
+		resp = waypoint_push(0,waypoints)
 		rospy.sleep(5)
 	switch_modes(0, "guided", 1)
 	switch_modes(0, "auto", 5)
@@ -230,7 +230,7 @@ def main():
 			# print("Waiting for UAV to be close to next takeoff point")
 			# if abs(latitude-takeoff1[0])<tolerance and abs(longitude-takeoff1[1])<tolerance:
 			# readyBit.publish(0)
-			takeoff_waypoint_land(waypoints1, takeoff1, land1, readyBit,0)
+			takeoff_waypoint_land(waypoints1, takeoff1, land1, readyBit, 0)
 			break
 	elif waypoint_section == 2:
 		while True:
@@ -238,7 +238,7 @@ def main():
 			print("Waiting for UAV to be close to next takeoff point")
 			if abs(latitude-takeoff2[0])<tolerance and abs(longitude-takeoff2[1])<tolerance:
 				readyBit.publish(0)
-				takeoff_waypoint_land(waypoints2, takeoff2, land2, readyBit,0)
+				takeoff_waypoint_land(waypoints2, takeoff2, land2, readyBit, 0)
 				break
 	elif waypoint_section == 3:
 		while True:
@@ -246,7 +246,7 @@ def main():
 			print("Waiting for UAV to be close to next takeoff point")
 			if abs(latitude-takeoff3[0])<tolerance and abs(longitude-takeoff3[1])<tolerance:
 				readyBit.publish(0)
-				takeoff_waypoint_land(waypoints3, takeoff3, land3, readyBit,0)
+				takeoff_waypoint_land(waypoints3, takeoff3, land3, readyBit, 0)
 				break
 	elif waypoint_section == 4:
 		while True:
@@ -254,7 +254,7 @@ def main():
 			print("Waiting for UAV to be close to next takeoff point")
 			if abs(latitude-takeoff4[0])<tolerance and abs(longitude-takeoff4[1])<tolerance:
 				readyBit.publish(0)
-				takeoff_waypoint_land(waypoints4, takeoff4, land4, readyBit,1)
+				takeoff_waypoint_land(waypoints4, takeoff4, land4, readyBit, 1)
 				break
 	else:
 		print("You inputed a wrong number. Try again.")
