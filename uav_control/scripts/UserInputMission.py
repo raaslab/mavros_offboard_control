@@ -15,7 +15,7 @@ latitude = 0.0
 longitude = 0.0
 altitude = 0.0
 last_waypoint = False
-tolerance = 0.00005
+tolerance = 0.00015
 ugv_ready = "0"
 
 def waypoint_callback(data):
@@ -43,8 +43,9 @@ def ready_callback(data):
 def waiting_ugv(lat, long, alt):
 	print("\n----------waiting_ugv----------")
 	while True:
-		# if checker == 1:
-		if ugv_ready == 1:
+		checker = 1
+		if checker == 1:
+		# if ugv_ready == 1:
 			waypoints = [
 			Waypoint(frame = 3, command = 21, is_current = 0, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt),
 			Waypoint(frame = 3, command = 21, is_current = 1, autocontinue = True, param1 = 5, x_lat = lat, y_long = long, z_alt = alt)
@@ -79,7 +80,7 @@ def finishWaypoints(lat, long, pub):
 				# Waiting for last_waypoint to be false
 				if abs(latitude-(lat))<tolerance and abs(longitude-(long))<tolerance:
 				# if last_waypoint == False:	# If last_waypoint has been visited (due to previous constraint)
-					pub.publish(1)
+					#pub.publish(1)
 					break
 			break
 	return
@@ -226,11 +227,11 @@ def main():
 	if waypoint_section == 1:
 		while True:
 			rospy.sleep(2)
-			print("Waiting for UAV to be close to next takeoff point")
-			if abs(latitude-takeoff1[0])<tolerance and abs(longitude-takeoff1[1])<tolerance:
-				readyBit.publish(0)
-				takeoff_waypoint_land(waypoints1, takeoff1, land1, readyBit,0)
-				break
+			# print("Waiting for UAV to be close to next takeoff point")
+			# if abs(latitude-takeoff1[0])<tolerance and abs(longitude-takeoff1[1])<tolerance:
+			# readyBit.publish(0)
+			takeoff_waypoint_land(waypoints1, takeoff1, land1, readyBit,0)
+			break
 	elif waypoint_section == 2:
 		while True:
 			rospy.sleep(2)
