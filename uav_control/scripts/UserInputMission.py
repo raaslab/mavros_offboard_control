@@ -76,12 +76,12 @@ def finishWaypoints(lat, long, pub):
 		# Waiting for last_waypoint to be true
 		if last_waypoint == True:			# If last_waypoint is in the process of being visited
 			while True:
-				rospy.sleep(2)
+				rospy.sleep(15)
 				# Waiting for last_waypoint to be false
-				if abs(latitude-(lat))<tolerance and abs(longitude-(long))<tolerance:
+			#	if abs(latitude-(lat))<tolerance and abs(longitude-(long))<tolerance:
 				# if last_waypoint == False:	# If last_waypoint has been visited (due to previous constraint)
 					#pub.publish(1)
-					break
+			#		break
 			break
 	return
 
@@ -230,32 +230,35 @@ def main():
 			# print("Waiting for UAV to be close to next takeoff point")
 			# if abs(latitude-takeoff1[0])<tolerance and abs(longitude-takeoff1[1])<tolerance:
 			# readyBit.publish(0)
-			takeoff_waypoint_land(waypoints1, takeoff1, land1, readyBit,0)
+			takeoff_waypoint_land(waypoints1, takeoff1, land1, readyBit,1)
 			break
 	elif waypoint_section == 2:
 		while True:
 			rospy.sleep(2)
 			print("Waiting for UAV to be close to next takeoff point")
-			if abs(latitude-takeoff2[0])<tolerance and abs(longitude-takeoff2[1])<tolerance:
-				readyBit.publish(0)
-				takeoff_waypoint_land(waypoints2, takeoff2, land2, readyBit,0)
-				break
+			# if abs(latitude-takeoff2[0])<tolerance and abs(longitude-takeoff2[1])<tolerance:
+			raw_input()			
+			# readyBit.publish(0)
+			takeoff_waypoint_land(waypoints2, takeoff2, land2, readyBit,0)
+			break
 	elif waypoint_section == 3:
 		while True:
 			rospy.sleep(2)
 			print("Waiting for UAV to be close to next takeoff point")
-			if abs(latitude-takeoff3[0])<tolerance and abs(longitude-takeoff3[1])<tolerance:
-				readyBit.publish(0)
-				takeoff_waypoint_land(waypoints3, takeoff3, land3, readyBit,0)
-				break
+			# if abs(latitude-takeoff3[0])<tolerance and abs(longitude-takeoff3[1])<tolerance:
+			raw_input()			
+			# readyBit.publish(0)
+			takeoff_waypoint_land(waypoints3, takeoff3, land3, readyBit,0)
+			break
 	elif waypoint_section == 4:
 		while True:
 			rospy.sleep(2)
 			print("Waiting for UAV to be close to next takeoff point")
-			if abs(latitude-takeoff4[0])<tolerance and abs(longitude-takeoff4[1])<tolerance:
-				readyBit.publish(0)
-				takeoff_waypoint_land(waypoints4, takeoff4, land4, readyBit,1)
-				break
+			# if abs(latitude-takeoff4[0])<tolerance and abs(longitude-takeoff4[1])<tolerance:
+			raw_input()			
+			# readyBit.publish(0)
+			takeoff_waypoint_land(waypoints4, takeoff4, land4, readyBit,1)
+			break
 	else:
 		print("You inputed a wrong number. Try again.")
 
