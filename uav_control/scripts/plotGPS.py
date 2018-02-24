@@ -61,7 +61,7 @@ def takeoff_call(lat, long, alt):
 def plotData(xData, yData, axis):
 	plt.plot(xData, yData, 'ro')
 	if axis == 0:
-		break
+		return
 	else:
 		plt.axis(axis)
 	plt.show()
