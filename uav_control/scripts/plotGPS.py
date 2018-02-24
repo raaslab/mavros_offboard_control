@@ -62,7 +62,7 @@ def plotData(xData, yData, axis):
 	plt.plot(xData, yData, 'ro')
 	if axis == 0:
 		break
-	else
+	else:
 		plt.axis(axis)
 	plt.show()
 
