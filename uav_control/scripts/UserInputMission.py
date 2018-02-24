@@ -230,60 +230,32 @@ def main():
 			# print("Waiting for UAV to be close to next takeoff point")
 			# if abs(latitude-takeoff1[0])<tolerance and abs(longitude-takeoff1[1])<tolerance:
 			# readyBit.publish(0)
-<<<<<<< HEAD
-			takeoff_waypoint_land(waypoints1, takeoff1, land1, readyBit,1)
-=======
 			takeoff_waypoint_land(waypoints1, takeoff1, land1, 0)
->>>>>>> e18206d2fb3e410aa9ddb1eed90afe1bab8d6b3e
 			break
 	elif waypoint_section == 2:
 		while True:
 			rospy.sleep(2)
 			print("Waiting for UAV to be close to next takeoff point")
-<<<<<<< HEAD
 			# if abs(latitude-takeoff2[0])<tolerance and abs(longitude-takeoff2[1])<tolerance:
 			raw_input()			
-			# readyBit.publish(0)
-			takeoff_waypoint_land(waypoints2, takeoff2, land2, readyBit,0)
+			takeoff_waypoint_land(waypoints2, takeoff2, land2, 0)
 			break
-=======
-			if abs(latitude-takeoff2[0])<tolerance and abs(longitude-takeoff2[1])<tolerance:
-				# readyBit.publish(0)
-				takeoff_waypoint_land(waypoints2, takeoff2, land2, 0)
-				break
->>>>>>> e18206d2fb3e410aa9ddb1eed90afe1bab8d6b3e
 	elif waypoint_section == 3:
 		while True:
 			rospy.sleep(2)
 			print("Waiting for UAV to be close to next takeoff point")
-<<<<<<< HEAD
 			# if abs(latitude-takeoff3[0])<tolerance and abs(longitude-takeoff3[1])<tolerance:
 			raw_input()			
-			# readyBit.publish(0)
-			takeoff_waypoint_land(waypoints3, takeoff3, land3, readyBit,0)
+			takeoff_waypoint_land(waypoints3, takeoff3, land3, 0)
 			break
-=======
-			if abs(latitude-takeoff3[0])<tolerance and abs(longitude-takeoff3[1])<tolerance:
-				# readyBit.publish(0)
-				takeoff_waypoint_land(waypoints3, takeoff3, land3, 0)
-				break
->>>>>>> e18206d2fb3e410aa9ddb1eed90afe1bab8d6b3e
 	elif waypoint_section == 4:
 		while True:
 			rospy.sleep(2)
 			print("Waiting for UAV to be close to next takeoff point")
-<<<<<<< HEAD
 			# if abs(latitude-takeoff4[0])<tolerance and abs(longitude-takeoff4[1])<tolerance:
 			raw_input()			
-			# readyBit.publish(0)
-			takeoff_waypoint_land(waypoints4, takeoff4, land4, readyBit,1)
+			takeoff_waypoint_land(waypoints4, takeoff4, land4, 1)
 			break
-=======
-			if abs(latitude-takeoff4[0])<tolerance and abs(longitude-takeoff4[1])<tolerance:
-				# readyBit.publish(0)
-				takeoff_waypoint_land(waypoints4, takeoff4, land4, 1)
-				break
->>>>>>> e18206d2fb3e410aa9ddb1eed90afe1bab8d6b3e
 	else:
 		print("You inputed a wrong number. Try again.")
 
