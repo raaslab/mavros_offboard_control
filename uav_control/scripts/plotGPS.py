@@ -85,7 +85,7 @@ def main():
 		yData.append(yDataTemp)
 		time.sleep(1)
 		counter = counter + 1
-		if counter == 400
+		if counter == 400:
 			break
 
 	plotData(xData, yData, 0)
