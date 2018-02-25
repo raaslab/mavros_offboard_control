@@ -59,6 +59,7 @@ def takeoff_call(lat, long, alt):
 	return
 
 def plotData(xData, yData, axis):
+	print("plotData======================================")
 	plt.plot(xData, yData, 'ro')
 	if axis == 0:
 		return
@@ -74,18 +75,19 @@ def main():
 	# readyBit = rospy.Publisher("/mavros/uav/ready", Int64, queue_size=10) # Flag topic
 	# readyBit.publish(0)
 	# clear_pull()
-
 	
 	xData = []
 	yData = []
 	counter = 0
 	while True:
 		[xDataTemp, yDataTemp, rando, rando1] = utm.from_latlon(latitude, longitude)
+		print(counter, "- xDataTemp:", xDataTemp, "yDataTemp:", yDataTemp)
 		xData.append(xDataTemp)
 		yData.append(yDataTemp)
 		time.sleep(1)
 		counter = counter + 1
 		if counter == 400:
+			print("Break")
 			break
 
 	plotData(xData, yData, 0)
